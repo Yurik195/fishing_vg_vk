@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-fullscreen">
+    <meta name="screen-orientation" content="landscape">
+    <meta name="apple-mobile-web-app-orientation" content="landscape">
+    <title>Fishing Game</title>
+    <link rel="stylesheet" href="app.css">
+</head>
+<body>
+    
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+    </div>
+    
+    <!-- Playgama Bridge SDK - ОБЯЗАТЕЛЬНО для работы на платформе -->
+    <script src="https://bridge.playgama.com/v1/stable/playgama-bridge.js"></script>
+    
+    <!-- VK Bridge SDK - для облачных сохранений и баннеров на VK -->
+    <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
+    
+    <!-- SDK Integration Adapter -->
+    <script src="PlaygamaSDK.js"></script>
+    
+    <!-- Базовые системы -->
+    <script src="config.js"></script>
+    <script src="FontManager.js"></script>
+    <script src="scale.js"></script>
+    <script src="audio.js"></script>
+    <script src="input.js"></script>
+    
+    <!-- Облачная загрузка ассетов -->
+    <script src="CloudAssetLoader.js"></script>
+    <script src="LoadingIndicator.js"></script>
+    <script src="AssetManager.js"></script>
+    
+    <!-- Система локализации -->
+    <script src="translations_en.js"></script>
+    <script src="translations_ru.js"></script>
+    <script src="LocalizationSystem.js"></script>
+    
+    <!-- Базы данных (нужны для HomeScreen и других экранов) -->
+    <script src="fishData.js"></script>
+    <script src="baitsData.js"></script>
+    <script src="gearData.js"></script>
+    <script src="GearWearSystem.js"></script>
+    <script src="zonesData.js"></script>
+    <script src="junkData.js"></script>
+    <script src="monstersData.js"></script>
+    <script src="premiumData.js"></script>
+    <script src="iapData.js"></script>
+    
+    <!-- Система профиля (нужна для HomeScreen) -->
+    <script src="ProfileSystem.js"></script>
+    <script src="ProfileUI.js"></script>
+    
+    <!-- Экраны -->
+    <script src="HomeScreen.js"></script>
+    <script src="ShopUI.js"></script>
+    <script src="InventoryUI.js"></script>
+    <script src="CollectionSystem.js"></script>
+    <script src="CollectionUI.js"></script>
+    <script src="MarketSystem.js"></script>
+    <script src="MarketUI.js"></script>
+    <script src="LocationDetailModal.js"></script>
+    <script src="MapScreen.js"></script>
+    <script src="SettingsUI.js"></script>
+    
+    <!-- Модули рыбалки -->
+    <script src="FishingZoneSystem.js"></script>
+    <script src="fishing/FishingConfig.js"></script>
+    <script src="fishing/FishingProgression.js"></script>
+    <script src="fishing/FishingStateMachine.js"></script>
+    <script src="fishing/WaterRenderer.js"></script>
+    <script src="fishing/FishingRod.js"></script>
+    <script src="fishing/Bobber.js"></script>
+    <script src="fishing/FishingLine.js"></script>
+    <script src="fishing/FishingUI.js"></script>
+    <script src="fishing/FishStorageUI.js"></script>
+    <script src="fishing/ResultModal.js"></script>
+    <script src="fishing/GearInventory.js"></script>
+    <script src="fishing/GearInventoryUI.js"></script>
+    <script src="fishing/BonusInventoryUI.js"></script>
+    <script src="fishing/FishingGame.js"></script>
+    
+    <!-- Система заданий -->
+    <script src="QuestSystem.js"></script>
+    <script src="QuestUI.js"></script>
+    
+    <!-- Система ежедневных наград -->
+    <script src="DailyRewardsSystem.js"></script>
+    <script src="DailyRewardsUI.js"></script>
+    
+    <!-- Система рейтинга -->
+    <script src="RatingSystem.js"></script>
+    <script src="RatingUI.js"></script>
+    
+    <!-- Система трофеев -->
+    <script src="TrophySystem.js"></script>
+    <script src="TrophyUI.js"></script>
+    
+    <!-- Система дня и ночи -->
+    <script src="DayNightSystem.js"></script>
+    <script src="DayNightUI.js"></script>
+    
+    <!-- Система оценки игры -->
+    <script src="RatingPromptSystem.js"></script>
+    
+    <!-- Система подсказок перед рыбалкой -->
+    <script src="FishingTipsSystem.js"></script>
+    
+    <!-- Система туториала -->
+    <script src="TutorialSystem.js"></script>
+    <script src="TutorialHighlight.js"></script>
+    
+    <!-- Дебаг панель -->
+    <script src="DebugPanel.js"></script>
+    
+    <!-- Кастомный курсор -->
+    <script src="CustomCursor.js"></script>
+    
+    <!-- Главный файл -->
+    <script src="main.js"></script>
+</body>
+</html>
