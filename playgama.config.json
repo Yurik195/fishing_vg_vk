@@ -1,0 +1,22 @@
+{
+  "appId": "fishing3",
+  "version": "1.0.0",
+  "advertising": {
+    "interstitial": {
+      "enabled": true,
+      "frequency": 90
+    },
+    "rewarded": {
+      "enabled": true
+    }
+  },
+  "payments": {
+    "enabled": true
+  },
+  "leaderboard": {
+    "enabled": false
+  },
+  "social": {
+    "enabled": false
+  }
+}
