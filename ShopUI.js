@@ -1049,16 +1049,9 @@ class ShopUI {
                 ctx.fillText(priceText, x + 80, y + 38);
             }
         } else if (item.isPremium) {
-            // Для IAP товаров (currency === 'iap') или товаров с флагом hideGemIcon не показываем иконку гемов
-            if (item.currency === 'iap' || item.hideGemIcon) {
-                // Используем форматированную цену из SDK если доступна
-                const priceText = item.priceFormatted || `${item.price} ${item.priceCurrencyCode || 'YAN'}`;
-                ctx.fillStyle = '#e67e22';
-                ctx.font = this.getFont(17);
-                ctx.textAlign = 'left';
-                ctx.fillText(priceText, x + 80, y + 38);
-            } else {
-                // Оранжевый цвет с белой обводкой для лучшей читаемости
+            // Проверяем валюту премиум товара (сначала gems, потом iap)
+            if (item.currency === 'gems') {
+                // Товар за гемы (включая конвертированные из IAP для VK/OK)
                 ctx.font = this.getFont(17);
                 ctx.textAlign = 'left';
                 
@@ -1072,22 +1065,18 @@ class ShopUI {
                 ctx.fillText(`${item.price}`, x + 80, y + 38);
                 
                 // Рисуем иконку гема справа от цены с отступом
-                // drawGemIcon рисует по центру, поэтому добавляем половину размера иконки
                 const priceWidth = ctx.measureText(`${item.price}`).width;
                 const iconSize = 17;
                 assetManager.drawGemIcon(ctx, x + 80 + priceWidth + 5 + iconSize/2, y + 38, iconSize);
-            }
-        } else {
-            // Проверяем валюту товара
-            if (item.currency === 'iap') {
+            } else if (item.currency === 'iap' || item.hideGemIcon) {
                 // Товар за ЯНы (IAP) - используем форматированную цену из SDK
                 const priceText = item.priceFormatted || `${item.price} ${item.priceCurrencyCode || 'YAN'}`;
                 ctx.fillStyle = '#e67e22';
                 ctx.font = this.getFont(17);
                 ctx.textAlign = 'left';
                 ctx.fillText(priceText, x + 80, y + 38);
-            } else if (item.currency === 'gems') {
-                // Товар за гемы - отображаем с иконкой
+            } else {
+                // Обычные гемы без IAP
                 ctx.font = this.getFont(17);
                 ctx.textAlign = 'left';
                 
@@ -1104,6 +1093,34 @@ class ShopUI {
                 const priceWidth = ctx.measureText(`${item.price}`).width;
                 const iconSize = 17;
                 assetManager.drawGemIcon(ctx, x + 80 + priceWidth + 5 + iconSize/2, y + 38, iconSize);
+            }
+        } else {
+            // Проверяем валюту товара (сначала gems, потом iap)
+            if (item.currency === 'gems') {
+                // Товар за гемы (включая конвертированные из IAP для VK/OK)
+                ctx.font = this.getFont(17);
+                ctx.textAlign = 'left';
+                
+                // Черная обводка для лучшей читаемости
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 2;
+                ctx.strokeText(`${item.price}`, x + 80, y + 38);
+                
+                // Оранжевая заливка
+                ctx.fillStyle = '#ff8c00';
+                ctx.fillText(`${item.price}`, x + 80, y + 38);
+                
+                // Рисуем иконку гема справа от цены с отступом
+                const priceWidth = ctx.measureText(`${item.price}`).width;
+                const iconSize = 17;
+                assetManager.drawGemIcon(ctx, x + 80 + priceWidth + 5 + iconSize/2, y + 38, iconSize);
+            } else if (item.currency === 'iap') {
+                // Товар за ЯНы (IAP) - используем форматированную цену из SDK
+                const priceText = item.priceFormatted || `${item.price} ${item.priceCurrencyCode || 'YAN'}`;
+                ctx.fillStyle = '#e67e22';
+                ctx.font = this.getFont(17);
+                ctx.textAlign = 'left';
+                ctx.fillText(priceText, x + 80, y + 38);
             } else {
                 // Товар за обычные монеты
                 ctx.fillStyle = '#f1c40f';
@@ -2051,16 +2068,9 @@ class ShopUI {
                 ctx.fillText(`${L('shop_price', 'Цена:')} ${priceText}`, statsX, statsY);
             }
         } else if (item.isPremium) {
-            // Для IAP товаров (currency === 'iap') или товаров с флагом hideGemIcon не показываем иконку гемов
-            if (item.currency === 'iap' || item.hideGemIcon) {
-                // Используем форматированную цену из SDK если доступна
-                const priceText = item.priceFormatted || `${item.price} ${item.priceCurrencyCode || 'YAN'}`;
-                ctx.fillStyle = '#e67e22';
-                ctx.font = this.getFont(20);
-                ctx.textAlign = 'left';
-                ctx.fillText(`${L('shop_price', 'Цена:')} ${priceText}`, statsX, statsY);
-            } else {
-                // Оранжевый цвет с белой обводкой для лучшей читаемости
+            // Проверяем валюту премиум товара (сначала gems, потом iap)
+            if (item.currency === 'gems') {
+                // Товар за гемы (включая конвертированные из IAP для VK/OK)
                 ctx.font = this.getFont(20);
                 ctx.textAlign = 'left';
                 
@@ -2076,14 +2086,60 @@ class ShopUI {
                 ctx.fillText(priceText, statsX, statsY);
                 
                 // Рисуем иконку гема справа от цены с отступом
-                // drawGemIcon рисует по центру, поэтому добавляем половину размера иконки
+                const priceWidth = ctx.measureText(priceText).width;
+                const iconSize = 20;
+                assetManager.drawGemIcon(ctx, statsX + priceWidth + 5 + iconSize/2, statsY, iconSize);
+            } else if (item.currency === 'iap' || item.hideGemIcon) {
+                // Товар за ЯНы (IAP) - используем форматированную цену из SDK
+                const priceText = item.priceFormatted || `${item.price} ${item.priceCurrencyCode || 'YAN'}`;
+                ctx.fillStyle = '#e67e22';
+                ctx.font = this.getFont(20);
+                ctx.textAlign = 'left';
+                ctx.fillText(`${L('shop_price', 'Цена:')} ${priceText}`, statsX, statsY);
+            } else {
+                // Обычные гемы без IAP
+                ctx.font = this.getFont(20);
+                ctx.textAlign = 'left';
+                
+                const priceText = `${L('shop_price', 'Цена:')} ${item.price}`;
+                
+                // Черная обводка для лучшей читаемости
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 2;
+                ctx.strokeText(priceText, statsX, statsY);
+                
+                // Оранжевая заливка
+                ctx.fillStyle = '#ff8c00';
+                ctx.fillText(priceText, statsX, statsY);
+                
+                // Рисуем иконку гема справа от цены с отступом
                 const priceWidth = ctx.measureText(priceText).width;
                 const iconSize = 20;
                 assetManager.drawGemIcon(ctx, statsX + priceWidth + 5 + iconSize/2, statsY, iconSize);
             }
         } else {
-            // Проверяем валюту товара
-            if (item.currency === 'iap') {
+            // Проверяем валюту товара (сначала gems, потом iap)
+            if (item.currency === 'gems') {
+                // Товар за гемы (включая конвертированные из IAP для VK/OK)
+                ctx.font = this.getFont(20);
+                ctx.textAlign = 'left';
+                
+                const priceText = `${L('shop_price', 'Цена:')} ${item.price}`;
+                
+                // Черная обводка для лучшей читаемости
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 2;
+                ctx.strokeText(priceText, statsX, statsY);
+                
+                // Оранжевая заливка
+                ctx.fillStyle = '#ff8c00';
+                ctx.fillText(priceText, statsX, statsY);
+                
+                // Рисуем иконку гема справа от цены с отступом
+                const priceWidth = ctx.measureText(priceText).width;
+                const iconSize = 20;
+                assetManager.drawGemIcon(ctx, statsX + priceWidth + 5 + iconSize/2, statsY, iconSize);
+            } else if (item.currency === 'iap') {
                 // Товар за ЯНы (IAP) - используем форматированную цену из SDK
                 const priceText = item.priceFormatted || `${item.price} ${item.priceCurrencyCode || 'YAN'}`;
                 ctx.fillStyle = '#e67e22';

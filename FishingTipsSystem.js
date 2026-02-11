@@ -1356,7 +1356,7 @@ class FishingTipsUI {
         if (this.selectedBundle.currency === 'gems') {
             const textWidth = ctx.measureText(fullText).width;
             const iconSize = 20 * scale * textScale * 1.7;
-            const iconX = btnX + btnWidth / 2 + textWidth / 2 + 5 * scale;
+            const iconX = btnX + btnWidth / 2 + textWidth / 2 + 15 * scale; // Сдвинуто правее на 15 пикселей
             const iconY = btnY + btnHeight / 2 + 2 * scale;
             assetManager.drawGemIcon(ctx, iconX, iconY, iconSize);
         }
