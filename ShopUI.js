@@ -1042,11 +1042,32 @@ class ShopUI {
                 ctx.fillStyle = '#ff8c00';
                 ctx.fillText(`${exchangeText} 💱`, x + 80, y + 38);
             } else {
-                // Используем форматированную цену из SDK если доступна
-                const priceText = item.priceFormatted || `${item.price} ${item.priceCurrencyCode || 'YAN'}`;
-                ctx.fillStyle = '#e67e22';
-                ctx.font = this.getFont(17);
-                ctx.fillText(priceText, x + 80, y + 38);
+                // Проверяем валюту IAP товара (сначала gems для VK/OK, потом iap)
+                if (item.currency === 'gems') {
+                    // Товар за гемы (конвертированный для VK/OK)
+                    ctx.font = this.getFont(17);
+                    ctx.textAlign = 'left';
+                    
+                    // Черная обводка для лучшей читаемости
+                    ctx.strokeStyle = '#000';
+                    ctx.lineWidth = 2;
+                    ctx.strokeText(`${item.price}`, x + 80, y + 38);
+                    
+                    // Оранжевая заливка
+                    ctx.fillStyle = '#ff8c00';
+                    ctx.fillText(`${item.price}`, x + 80, y + 38);
+                    
+                    // Рисуем иконку гема справа от цены с отступом
+                    const priceWidth = ctx.measureText(`${item.price}`).width;
+                    const iconSize = 17;
+                    assetManager.drawGemIcon(ctx, x + 80 + priceWidth + 5 + iconSize/2, y + 38, iconSize);
+                } else {
+                    // Товар за ЯНы (IAP) - используем форматированную цену из SDK
+                    const priceText = item.priceFormatted || `${item.price} ${item.priceCurrencyCode || 'YAN'}`;
+                    ctx.fillStyle = '#e67e22';
+                    ctx.font = this.getFont(17);
+                    ctx.fillText(priceText, x + 80, y + 38);
+                }
             }
         } else if (item.isPremium) {
             // Проверяем валюту премиум товара (сначала gems, потом iap)
@@ -2061,11 +2082,34 @@ class ShopUI {
                 ctx.fillStyle = '#ff8c00';
                 ctx.fillText(exchangeText, statsX, statsY);
             } else {
-                // Используем форматированную цену из SDK если доступна
-                const priceText = item.priceFormatted || `${item.price} ${item.priceCurrencyCode || 'YAN'}`;
-                ctx.fillStyle = '#e67e22';
-                ctx.font = this.getFont(20);
-                ctx.fillText(`${L('shop_price', 'Цена:')} ${priceText}`, statsX, statsY);
+                // Проверяем валюту IAP товара (сначала gems для VK/OK, потом iap)
+                if (item.currency === 'gems') {
+                    // Товар за гемы (конвертированный для VK/OK)
+                    ctx.font = this.getFont(20);
+                    ctx.textAlign = 'left';
+                    
+                    const priceText = `${L('shop_price', 'Цена:')} ${item.price}`;
+                    
+                    // Черная обводка для лучшей читаемости
+                    ctx.strokeStyle = '#000';
+                    ctx.lineWidth = 2;
+                    ctx.strokeText(priceText, statsX, statsY);
+                    
+                    // Оранжевая заливка
+                    ctx.fillStyle = '#ff8c00';
+                    ctx.fillText(priceText, statsX, statsY);
+                    
+                    // Рисуем иконку гема справа от цены с отступом
+                    const priceWidth = ctx.measureText(priceText).width;
+                    const iconSize = 20;
+                    assetManager.drawGemIcon(ctx, statsX + priceWidth + 5 + iconSize/2, statsY, iconSize);
+                } else {
+                    // Товар за ЯНы (IAP) - используем форматированную цену из SDK
+                    const priceText = item.priceFormatted || `${item.price} ${item.priceCurrencyCode || 'YAN'}`;
+                    ctx.fillStyle = '#e67e22';
+                    ctx.font = this.getFont(20);
+                    ctx.fillText(`${L('shop_price', 'Цена:')} ${priceText}`, statsX, statsY);
+                }
             }
         } else if (item.isPremium) {
             // Проверяем валюту премиум товара (сначала gems, потом iap)
