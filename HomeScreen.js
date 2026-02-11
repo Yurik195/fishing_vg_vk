@@ -274,7 +274,13 @@ class HomeScreen {
         }
         
         // Проверка правых кнопок
+        // Для VK и OK платформ скрываем кнопку "Рейтинг"
+        const platform = window.playgamaSDK?.platform;
         for (const btn of this.rightButtons) {
+            // Пропускаем кнопку рейтинга для VK и OK
+            if (btn.id === 'rating' && (platform === 'vk' || platform === 'ok')) {
+                continue;
+            }
             if (this.isPointInButton(x, y, btn)) {
                 this.onNavigate(btn.id);
                 return true;
@@ -325,7 +331,13 @@ class HomeScreen {
         }
         
         // Проверка правых кнопок
+        // Для VK и OK платформ скрываем кнопку "Рейтинг"
+        const platform = window.playgamaSDK?.platform;
         for (const btn of this.rightButtons) {
+            // Пропускаем кнопку рейтинга для VK и OK
+            if (btn.id === 'rating' && (platform === 'vk' || platform === 'ok')) {
+                continue;
+            }
             if (this.isPointInButton(x, y, btn)) {
                 this.hoveredButton = btn;
                 return;
@@ -414,7 +426,13 @@ class HomeScreen {
             });
             
             // Правые кнопки (квадратные с иконками)
+            // Для VK и OK платформ скрываем кнопку "Рейтинг"
+            const platform = window.playgamaSDK?.platform;
             this.rightButtons.forEach(btn => {
+                // Пропускаем кнопку рейтинга для VK и OK
+                if (btn.id === 'rating' && (platform === 'vk' || platform === 'ok')) {
+                    return;
+                }
                 this.renderSquareButton(ctx, btn);
             });
             

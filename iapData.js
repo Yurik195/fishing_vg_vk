@@ -40,7 +40,7 @@ const IAP_DATABASE = [
         adCount: 3,
         currentProgress: 0,
         maxProgress: 3,
-        cooldown: 20 * 60 * 1000, // 20 минут в миллисекундах
+        cooldown: 40 * 60 * 1000, // 40 минут в миллисекундах (было 20, увеличено в 2 раза)
         lastClaimTime: 0,
         reward: {
             regularCoins: 500,
@@ -57,7 +57,7 @@ const IAP_DATABASE = [
         adCount: 5,
         currentProgress: 0,
         maxProgress: 5,
-        cooldown: 60 * 60 * 1000, // 60 минут в миллисекундах
+        cooldown: 120 * 60 * 1000, // 120 минут в миллисекундах (было 60, увеличено в 2 раза)
         lastClaimTime: 0,
         reward: {
             regularCoins: 700,
@@ -74,7 +74,7 @@ const IAP_DATABASE = [
         adCount: 7,
         currentProgress: 0,
         maxProgress: 7,
-        cooldown: 2 * 60 * 60 * 1000, // 2 часа в миллисекундах
+        cooldown: 24 * 60 * 60 * 1000, // 24 часа в миллисекундах (раз в сутки)
         lastClaimTime: 0,
         reward: {
             regularCoins: 1000,
