@@ -238,13 +238,12 @@ const IAP_DATABASE = [
             ok: null // OK не поддерживает IAP
         },
         fallbackPrice: 160, // Цена в рыболовных марках для платформ без IAP
-        vkPrice: 174, // Цена для VK/OK: (39+39+39+49+39) × 0.85 = 174 марки
         contents: {
-            rod: 4,      // Удочка Матчевая
-            line: 4,     // Леска Флюорокарбон 0.28
-            float: 3,    // Поплавок Веретено
-            hook: 4,     // Крючок Карповый
-            reel: 3      // Катушка Комфорт
+            rod: 4,      // Удочка Матчевая (39 ЯН)
+            line: 4,     // Леска Флюорокарбон 0.28 (39 ЯН)
+            float: 3,    // Поплавок Веретено (39 ЯН)
+            hook: 4,     // Крючок Карповый (49 ЯН)
+            reel: 3      // Катушка Комфорт (39 ЯН)
         }
     },
     {
@@ -262,13 +261,12 @@ const IAP_DATABASE = [
             ok: null // OK не поддерживает IAP
         },
         fallbackPrice: 290, // Цена в рыболовных марках для платформ без IAP
-        vkPrice: 319, // Цена для VK/OK: (79+69+69+79+79) × 0.85 = 319 марок
         contents: {
-            rod: 9,      // Удочка Карповая
-            line: 10,    // Леска Морская PE 4.0
-            float: 7,    // Поплавок Матчевый
-            hook: 8,     // Крючок Хищник
-            reel: 8      // Катушка Турнир
+            rod: 9,      // Удочка Карповая (79 ЯН)
+            line: 10,    // Леска Морская PE 4.0 (69 ЯН)
+            float: 7,    // Поплавок Матчевый (69 ЯН)
+            hook: 8,     // Крючок Хищник (79 ЯН)
+            reel: 8      // Катушка Турнир (79 ЯН)
         }
     },
     {
@@ -286,13 +284,12 @@ const IAP_DATABASE = [
             ok: null // OK не поддерживает IAP
         },
         fallbackPrice: 400, // Цена в рыболовных марках для платформ без IAP
-        vkPrice: 446, // Цена для VK/OK: (99+99+109+119+99) × 0.85 = 446 марок
         contents: {
-            rod: 14,     // Удочка Троллинг Pro
-            line: 15,    // Леска Океан PE 12
-            float: 16,   // Поплавок Титан
-            hook: 17,    // Крючок Меч-рыба
-            reel: 13     // Катушка Морская X-Heavy
+            rod: 14,     // Удочка Троллинг Pro (99 ЯН)
+            line: 15,    // Леска Океан PE 12 (99 ЯН)
+            float: 16,   // Поплавок Титан (109 ЯН)
+            hook: 17,    // Крючок Меч-рыба (119 ЯН)
+            reel: 13     // Катушка Морская X-Heavy (99 ЯН)
         }
     },
     
@@ -385,12 +382,12 @@ function getIAPItem(id) {
     if (isVKOrOK && item.type !== 'ad_reward' && item.type !== 'exchange') {
         let marksPrice;
         
-        // Для наборов снастей используем предрасчитанную цену или рассчитываем динамически
+        // Для наборов снастей рассчитываем цену динамически
         if (item.type === 'gear_bundle' && item.contents) {
-            marksPrice = item.vkPrice || calculateGearBundlePrice(item.contents);
+            marksPrice = calculateGearBundlePrice(item.contents);
         } else {
-            // Для остальных товаров используем предрасчитанную цену или конвертируем
-            marksPrice = item.vkPrice || convertIAPPriceToMarks(item.price);
+            // Для остальных товаров конвертируем цену
+            marksPrice = convertIAPPriceToMarks(item.price);
         }
         
         return {
@@ -504,11 +501,13 @@ function calculateGearBundlePrice(bundleContents, discount = 0.15) {
     
     let totalPrice = 0;
     
-    // Суммируем цены всех снастей
+    // Суммируем цены всех снастей (конвертируем IAP цены в марки)
     if (bundleContents.rod && typeof RODS_DATABASE !== 'undefined') {
         const rod = RODS_DATABASE.find(r => r.tier === bundleContents.rod);
         if (rod && rod.price) {
-            totalPrice += rod.price;
+            // Если снасть за IAP, конвертируем в марки
+            const price = rod.currency === 'iap' ? convertIAPPriceToMarks(rod.price) : rod.price;
+            totalPrice += price;
         } else {
             console.warn(`Rod tier ${bundleContents.rod} not found in database`);
         }
@@ -517,7 +516,9 @@ function calculateGearBundlePrice(bundleContents, discount = 0.15) {
     if (bundleContents.line && typeof LINES_DATABASE !== 'undefined') {
         const line = LINES_DATABASE.find(l => l.tier === bundleContents.line);
         if (line && line.price) {
-            totalPrice += line.price;
+            // Если снасть за IAP, конвертируем в марки
+            const price = line.currency === 'iap' ? convertIAPPriceToMarks(line.price) : line.price;
+            totalPrice += price;
         } else {
             console.warn(`Line tier ${bundleContents.line} not found in database`);
         }
@@ -526,7 +527,9 @@ function calculateGearBundlePrice(bundleContents, discount = 0.15) {
     if (bundleContents.float && typeof FLOATS_DATABASE !== 'undefined') {
         const float = FLOATS_DATABASE.find(f => f.tier === bundleContents.float);
         if (float && float.price) {
-            totalPrice += float.price;
+            // Если снасть за IAP, конвертируем в марки
+            const price = float.currency === 'iap' ? convertIAPPriceToMarks(float.price) : float.price;
+            totalPrice += price;
         } else {
             console.warn(`Float tier ${bundleContents.float} not found in database`);
         }
@@ -535,7 +538,9 @@ function calculateGearBundlePrice(bundleContents, discount = 0.15) {
     if (bundleContents.hook && typeof HOOKS_DATABASE !== 'undefined') {
         const hook = HOOKS_DATABASE.find(h => h.tier === bundleContents.hook);
         if (hook && hook.price) {
-            totalPrice += hook.price;
+            // Если снасть за IAP, конвертируем в марки
+            const price = hook.currency === 'iap' ? convertIAPPriceToMarks(hook.price) : hook.price;
+            totalPrice += price;
         } else {
             console.warn(`Hook tier ${bundleContents.hook} not found in database`);
         }
@@ -544,7 +549,9 @@ function calculateGearBundlePrice(bundleContents, discount = 0.15) {
     if (bundleContents.reel && typeof REELS_DATABASE !== 'undefined') {
         const reel = REELS_DATABASE.find(r => r.tier === bundleContents.reel);
         if (reel && reel.price) {
-            totalPrice += reel.price;
+            // Если снасть за IAP, конвертируем в марки
+            const price = reel.currency === 'iap' ? convertIAPPriceToMarks(reel.price) : reel.price;
+            totalPrice += price;
         } else {
             console.warn(`Reel tier ${bundleContents.reel} not found in database`);
         }

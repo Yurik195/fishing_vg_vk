@@ -81,7 +81,6 @@ const PREMIUM_DATABASE = [
         description: 'Показывает возможный вес, количество и виды рыб в месте заброса. Действует всегда если выбран.',
         price: 199,
         currency: 'iap',
-        vkPrice: 1393, // Цена для VK/OK: 199 × 7 = 1393 марки
         hideGemIcon: true, // Не показывать иконку гемов для IAP товаров
         duration: -1, // Постоянный эффект
         effect: {
@@ -127,7 +126,6 @@ const PREMIUM_DATABASE = [
         description: 'Показывает вид рыбы во время поклевки. Действует всегда если выбран.',
         price: 499,
         currency: 'iap',
-        vkPrice: 3493, // Цена для VK/OK: 499 × 7 = 3493 марки
         hideGemIcon: true, // Не показывать иконку гемов для IAP товаров
         duration: -1, // Постоянный эффект
         effect: {
@@ -143,7 +141,6 @@ const PREMIUM_DATABASE = [
         description: 'Карта коротких маршрутов к местам рыбалки. Постоянная скидка на перемещение по локациям.',
         price: 99,
         currency: 'iap',
-        vkPrice: 693, // Цена для VK/OK: 99 × 7 = 693 марки
         hideGemIcon: true, // Не показывать иконку гемов для IAP товаров
         duration: -1, // Постоянный эффект
         effect: {
@@ -213,7 +210,6 @@ const PREMIUM_DATABASE = [
         description: 'Продажа рыбы на рыбалке выгоднее на 10 минут. Увеличивает цену рыбы +40% на рыбалке.',
         price: 29,
         currency: 'iap',
-        vkPrice: 203, // Цена для VK/OK: 29 × 7 = 203 марки
         hideGemIcon: true, // Не показывать иконку гемов для IAP товаров
         duration: 600, // 10 минут в секундах
         effect: {
@@ -243,7 +239,6 @@ const PREMIUM_DATABASE = [
         description: 'Выпуск рыбы на рыбалке выгоднее на 10 минут. Увеличивает опыт за рыбу +40% на рыбалке.',
         price: 29,
         currency: 'iap',
-        vkPrice: 203, // Цена для VK/OK: 29 × 7 = 203 марки
         hideGemIcon: true, // Не показывать иконку гемов для IAP товаров
         duration: 600, // 10 минут в секундах
         effect: {
@@ -587,10 +582,14 @@ function getPremiumItemWithPlatformPrice(item) {
     // Проверяем наличие функции isVKOrOKPlatform
     const isVKOrOK = typeof isVKOrOKPlatform === 'function' ? isVKOrOKPlatform() : false;
     
-    if (isVKOrOK && item.currency === 'iap' && item.vkPrice) {
+    if (isVKOrOK && item.currency === 'iap') {
+        // Конвертируем IAP цену в марки
+        const marksPrice = typeof convertIAPPriceToMarks === 'function' ? 
+                          convertIAPPriceToMarks(item.price) : item.price * 7;
+        
         return {
             ...item,
-            price: item.vkPrice,
+            price: marksPrice,
             currency: 'gems',
             originalCurrency: 'iap',
             originalPrice: item.price

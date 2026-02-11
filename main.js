@@ -22,6 +22,9 @@ class Game {
         // Флаг инициализации SDK
         this.sdkInitialized = false;
         
+        // Время начала игры для проверки фуллскрин рекламы
+        this.gameStartTime = Date.now();
+        
         // Таймер для fullscreen рекламы (не сохраняется)
         this.lastFullscreenAdTime = 0;
         this.fullscreenAdCooldown = 90000; // 90 секунд
@@ -942,9 +945,17 @@ class Game {
         }
         
         const now = Date.now();
+        const timeSinceGameStart = now - this.gameStartTime;
+        
+        // Не показываем рекламу если игрок в игре меньше 1 минуты
+        if (timeSinceGameStart < 60000) {
+            console.log(`⏱️ Реклама не показана: игрок в игре ${Math.ceil(timeSinceGameStart / 1000)}с (нужно 60с)`);
+            return false;
+        }
+        
         const timeSinceLastAd = now - this.lastFullscreenAdTime;
         
-        // Проверяем прошло ли 60 секунд с последней рекламы
+        // Проверяем прошло ли 90 секунд с последней рекламы
         if (timeSinceLastAd < this.fullscreenAdCooldown) {
             console.log(`⏱️ Реклама на кулдауне: ${Math.ceil((this.fullscreenAdCooldown - timeSinceLastAd) / 1000)}с`);
             return false;
