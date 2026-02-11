@@ -115,6 +115,35 @@ class ShopUI {
         this.buyButton.y = this.modalY + this.modalHeight - 80;
     }
     
+    /**
+     * Фильтрует товары для VK/OK платформы
+     * @param {Array} items - Массив товаров
+     * @returns {Array} - Отфильтрованный массив
+     */
+    filterItemsForVKOK(items) {
+        // Проверяем наличие функции isVKOrOKPlatform
+        const isVKOrOK = typeof isVKOrOKPlatform === 'function' ? isVKOrOKPlatform() : false;
+        
+        if (!isVKOrOK) {
+            return items; // Для других платформ возвращаем все товары
+        }
+        
+        // Для VK/OK скрываем определенные типы товаров
+        return items.filter(item => {
+            // Скрываем покупки рыболовных марок
+            if (item.type === 'premium_coins') return false;
+            
+            // Скрываем покупки обычных монет
+            if (item.type === 'regular_coins') return false;
+            
+            // Скрываем премиум набор
+            if (item.id === 'premium_bundle') return false;
+            
+            // Остальные товары показываем
+            return true;
+        });
+    }
+    
     // Получить шрифт (используем глобальный fontManager)
     getFont(size, weight = 'bold') {
         return fontManager.getFont(size, weight);
@@ -174,100 +203,191 @@ class ShopUI {
         } else if (this.currentTab === 'hooks') {
             // Загружаем все крючки из базы
             if (typeof HOOKS_DATABASE !== 'undefined') {
+                const isVKOrOK = typeof isVKOrOKPlatform === 'function' ? isVKOrOKPlatform() : false;
+                
                 this.items = HOOKS_DATABASE.map(hook => {
                     const requiredLevel = typeof getRequiredLevelForTier === 'function' ? getRequiredLevelForTier(hook.tier) : 1;
                     const isPremium = hook.currency === 'iap';
                     const isLocked = !isPremium && this.playerLevel < requiredLevel;
                     
-                    return {
+                    let mappedHook = {
                         ...hook,
                         type: 'hook',
                         quantity: 1,
                         requiredLevel,
                         isLocked
                     };
+                    
+                    // Для VK/OK конвертируем IAP снасти в марки
+                    if (isVKOrOK && hook.currency === 'iap' && hook.price) {
+                        const marksPrice = typeof convertIAPPriceToMarks === 'function' ? 
+                                          convertIAPPriceToMarks(hook.price) : hook.price * 7;
+                        mappedHook = {
+                            ...mappedHook,
+                            price: marksPrice,
+                            currency: 'gems',
+                            originalCurrency: 'iap',
+                            originalPrice: hook.price
+                        };
+                    }
+                    
+                    return mappedHook;
                 });
             }
         } else if (this.currentTab === 'floats') {
             // Загружаем все поплавки из базы
             if (typeof FLOATS_DATABASE !== 'undefined') {
+                const isVKOrOK = typeof isVKOrOKPlatform === 'function' ? isVKOrOKPlatform() : false;
+                
                 this.items = FLOATS_DATABASE.map(float => {
                     const requiredLevel = typeof getRequiredLevelForTier === 'function' ? getRequiredLevelForTier(float.tier) : 1;
                     const isPremium = float.currency === 'iap';
                     const isLocked = !isPremium && this.playerLevel < requiredLevel;
                     
-                    return {
+                    let mappedFloat = {
                         ...float,
                         type: 'float',
                         quantity: 1,
                         requiredLevel,
                         isLocked
                     };
+                    
+                    // Для VK/OK конвертируем IAP снасти в марки
+                    if (isVKOrOK && float.currency === 'iap' && float.price) {
+                        const marksPrice = typeof convertIAPPriceToMarks === 'function' ? 
+                                          convertIAPPriceToMarks(float.price) : float.price * 7;
+                        mappedFloat = {
+                            ...mappedFloat,
+                            price: marksPrice,
+                            currency: 'gems',
+                            originalCurrency: 'iap',
+                            originalPrice: float.price
+                        };
+                    }
+                    
+                    return mappedFloat;
                 });
             }
         } else if (this.currentTab === 'lines') {
             // Загружаем все лески из базы
             if (typeof LINES_DATABASE !== 'undefined') {
+                const isVKOrOK = typeof isVKOrOKPlatform === 'function' ? isVKOrOKPlatform() : false;
+                
                 this.items = LINES_DATABASE.map(line => {
                     const requiredLevel = typeof getRequiredLevelForTier === 'function' ? getRequiredLevelForTier(line.tier) : 1;
                     const isPremium = line.currency === 'iap';
                     const isLocked = !isPremium && this.playerLevel < requiredLevel;
                     
-                    return {
+                    let mappedLine = {
                         ...line,
                         type: 'line',
                         quantity: 1,
                         requiredLevel,
                         isLocked
                     };
+                    
+                    // Для VK/OK конвертируем IAP снасти в марки
+                    if (isVKOrOK && line.currency === 'iap' && line.price) {
+                        const marksPrice = typeof convertIAPPriceToMarks === 'function' ? 
+                                          convertIAPPriceToMarks(line.price) : line.price * 7;
+                        mappedLine = {
+                            ...mappedLine,
+                            price: marksPrice,
+                            currency: 'gems',
+                            originalCurrency: 'iap',
+                            originalPrice: line.price
+                        };
+                    }
+                    
+                    return mappedLine;
                 });
             }
         } else if (this.currentTab === 'reels') {
             // Загружаем все катушки из базы
             if (typeof REELS_DATABASE !== 'undefined') {
+                const isVKOrOK = typeof isVKOrOKPlatform === 'function' ? isVKOrOKPlatform() : false;
+                
                 this.items = REELS_DATABASE.map(reel => {
                     const requiredLevel = typeof getRequiredLevelForTier === 'function' ? getRequiredLevelForTier(reel.tier) : 1;
                     const isPremium = reel.currency === 'iap';
                     const isLocked = !isPremium && this.playerLevel < requiredLevel;
                     
-                    return {
+                    let mappedReel = {
                         ...reel,
                         type: 'reel',
                         quantity: 1,
                         requiredLevel,
                         isLocked
                     };
+                    
+                    // Для VK/OK конвертируем IAP снасти в марки
+                    if (isVKOrOK && reel.currency === 'iap' && reel.price) {
+                        const marksPrice = typeof convertIAPPriceToMarks === 'function' ? 
+                                          convertIAPPriceToMarks(reel.price) : reel.price * 7;
+                        mappedReel = {
+                            ...mappedReel,
+                            price: marksPrice,
+                            currency: 'gems',
+                            originalCurrency: 'iap',
+                            originalPrice: reel.price
+                        };
+                    }
+                    
+                    return mappedReel;
                 });
             }
         } else if (this.currentTab === 'rods') {
             // Загружаем все удочки из базы
             if (typeof RODS_DATABASE !== 'undefined') {
+                const isVKOrOK = typeof isVKOrOKPlatform === 'function' ? isVKOrOKPlatform() : false;
+                
                 this.items = RODS_DATABASE.map(rod => {
                     const requiredLevel = typeof getRequiredLevelForTier === 'function' ? getRequiredLevelForTier(rod.tier) : 1;
                     const isPremium = rod.currency === 'iap';
                     const isLocked = !isPremium && this.playerLevel < requiredLevel;
                     
-                    return {
+                    let mappedRod = {
                         ...rod,
                         type: 'rod',
                         quantity: 1,
                         requiredLevel,
                         isLocked
                     };
+                    
+                    // Для VK/OK конвертируем IAP снасти в марки
+                    if (isVKOrOK && rod.currency === 'iap' && rod.price) {
+                        const marksPrice = typeof convertIAPPriceToMarks === 'function' ? 
+                                          convertIAPPriceToMarks(rod.price) : rod.price * 7;
+                        mappedRod = {
+                            ...mappedRod,
+                            price: marksPrice,
+                            currency: 'gems',
+                            originalCurrency: 'iap',
+                            originalPrice: rod.price
+                        };
+                    }
+                    
+                    return mappedRod;
                 });
             }
         } else if (this.currentTab === 'premium') {
             // Загружаем премиум товары
             if (typeof PREMIUM_DATABASE !== 'undefined') {
                 this.items = PREMIUM_DATABASE.map(item => {
-                    const mappedItem = {
+                    let mappedItem = {
                         ...item,
                         quantity: 1,
                         isPremium: true
                     };
                     
-                    // Синхронизируем цены из SDK для товаров с currency: 'iap'
-                    if (item.currency === 'iap' && window.playgamaSDK && window.playgamaSDK.isPaymentsReady) {
+                    // Для VK/OK применяем конвертацию цен
+                    if (typeof getPremiumItemWithPlatformPrice === 'function') {
+                        mappedItem = getPremiumItemWithPlatformPrice(mappedItem);
+                    }
+                    
+                    // Синхронизируем цены из SDK для товаров с currency: 'iap' (только для не-VK/OK)
+                    if (item.currency === 'iap' && mappedItem.currency === 'iap' && 
+                        window.playgamaSDK && window.playgamaSDK.isPaymentsReady) {
                         const productInfo = window.playgamaSDK.getProductInfo(item.id);
                         if (productInfo) {
                             mappedItem.priceValue = productInfo.priceValue;
@@ -283,14 +403,18 @@ class ShopUI {
             // Загружаем IAP товары
             if (typeof IAP_DATABASE !== 'undefined') {
                 this.items = IAP_DATABASE.map(item => {
+                    // Используем getIAPItem для получения правильной цены с учетом платформы
+                    const itemWithPrice = typeof getIAPItem === 'function' ? getIAPItem(item.id) : item;
+                    
                     const mappedItem = {
-                        ...item,
+                        ...(itemWithPrice || item),
                         quantity: 1,
                         isIAP: true
                     };
                     
-                    // Синхронизируем цены из SDK только для реальных IAP товаров (не ad_reward и не exchange)
+                    // Синхронизируем цены из SDK только для реальных IAP товаров на не-VK/OK платформах
                     if (item.type !== 'ad_reward' && item.type !== 'exchange' && 
+                        mappedItem.currency === 'iap' && // Только если еще не конвертировано в gems
                         window.playgamaSDK && window.playgamaSDK.platformCapabilities.payments) {
                         const productInfo = window.playgamaSDK.getProductInfo(item.id);
                         if (productInfo) {
@@ -306,6 +430,11 @@ class ShopUI {
                     return mappedItem;
                 });
             }
+        }
+        
+        // Применяем фильтрацию для VK/OK платформы
+        if (this.currentTab === 'iap' || this.currentTab === 'premium') {
+            this.items = this.filterItemsForVKOK(this.items);
         }
         
         // Сбрасываем значение обмена валюты

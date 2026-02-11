@@ -345,16 +345,32 @@ class FishingTipsSystem {
             }
         ];
         
-        // Синхронизируем цены из SDK если доступен
-        if (window.playgamaSDK && window.playgamaSDK.isPaymentsReady) {
+        // Проверяем платформу VK/OK
+        const isVKOrOK = typeof isVKOrOKPlatform === 'function' ? isVKOrOKPlatform() : false;
+        
+        if (isVKOrOK) {
+            // Для VK/OK конвертируем цены в марки
             gearBundles.forEach(bundle => {
-                const productInfo = window.playgamaSDK.getProductInfo(bundle.id);
-                if (productInfo) {
-                    bundle.priceValue = productInfo.priceValue;
-                    bundle.priceCurrencyCode = productInfo.priceCurrencyCode;
-                    bundle.priceFormatted = productInfo.price; // "159 ЯН"
+                const itemWithPrice = typeof getIAPItem === 'function' ? getIAPItem(bundle.id) : null;
+                if (itemWithPrice) {
+                    bundle.price = itemWithPrice.price;
+                    bundle.currency = itemWithPrice.currency;
+                    bundle.originalPrice = itemWithPrice.originalPrice;
+                    bundle.originalCurrency = itemWithPrice.originalCurrency;
                 }
             });
+        } else {
+            // Синхронизируем цены из SDK если доступен (для не-VK/OK)
+            if (window.playgamaSDK && window.playgamaSDK.isPaymentsReady) {
+                gearBundles.forEach(bundle => {
+                    const productInfo = window.playgamaSDK.getProductInfo(bundle.id);
+                    if (productInfo) {
+                        bundle.priceValue = productInfo.priceValue;
+                        bundle.priceCurrencyCode = productInfo.priceCurrencyCode;
+                        bundle.priceFormatted = productInfo.price; // "159 ЯН"
+                    }
+                });
+            }
         }
         
         // Другие бонусы из магазина за ЯН
@@ -1311,17 +1327,39 @@ class FishingTipsUI {
             ctx.drawImage(uipanImg, animBtnX, animBtnY, animBtnWidth, animBtnHeight);
         }
         
-        // Текст кнопки с ценой (используем форматированную цену из SDK)
-        const priceText = this.selectedBundle.priceFormatted || 
-                         `${this.selectedBundle.price} ${this.selectedBundle.priceCurrencyCode || 'YAN'}`;
+        // Текст кнопки с ценой
+        let priceText;
+        if (this.selectedBundle.currency === 'gems') {
+            // Для марок показываем только число, иконку нарисуем отдельно
+            priceText = `${this.selectedBundle.price}`;
+        } else {
+            // Для IAP используем форматированную цену из SDK
+            priceText = this.selectedBundle.priceFormatted || 
+                       `${this.selectedBundle.price} ${this.selectedBundle.priceCurrencyCode || 'YAN'}`;
+        }
+        
         ctx.fillStyle = '#ffffff';
         ctx.font = `bold ${20 * scale * textScale * 1.7}px "BabyPop", Arial`; // Увеличено на 70%
         ctx.textAlign = 'center';
+        
+        const buyText = L('buy', 'Купить');
+        const fullText = `${buyText} ${priceText}`;
+        
+        // Рисуем текст
         ctx.fillText(
-            `${L('buy', 'Купить')} ${priceText}`,
+            fullText,
             btnX + btnWidth / 2,
             btnY + btnHeight / 2 + 2 * scale
         );
+        
+        // Если валюта - марки, рисуем иконку марок после текста
+        if (this.selectedBundle.currency === 'gems') {
+            const textWidth = ctx.measureText(fullText).width;
+            const iconSize = 20 * scale * textScale * 1.7;
+            const iconX = btnX + btnWidth / 2 + textWidth / 2 + 5 * scale;
+            const iconY = btnY + btnHeight / 2 + 2 * scale;
+            assetManager.drawGemIcon(ctx, iconX, iconY, iconSize);
+        }
         
         this.bundleButton = { x: btnX, y: btnY, width: btnWidth, height: btnHeight };
     }

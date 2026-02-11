@@ -238,6 +238,7 @@ const IAP_DATABASE = [
             ok: null // OK не поддерживает IAP
         },
         fallbackPrice: 160, // Цена в рыболовных марках для платформ без IAP
+        vkPrice: 174, // Цена для VK/OK: (39+39+39+49+39) × 0.85 = 174 марки
         contents: {
             rod: 4,      // Удочка Матчевая
             line: 4,     // Леска Флюорокарбон 0.28
@@ -261,6 +262,7 @@ const IAP_DATABASE = [
             ok: null // OK не поддерживает IAP
         },
         fallbackPrice: 290, // Цена в рыболовных марках для платформ без IAP
+        vkPrice: 319, // Цена для VK/OK: (79+69+69+79+79) × 0.85 = 319 марок
         contents: {
             rod: 9,      // Удочка Карповая
             line: 10,    // Леска Морская PE 4.0
@@ -284,6 +286,7 @@ const IAP_DATABASE = [
             ok: null // OK не поддерживает IAP
         },
         fallbackPrice: 400, // Цена в рыболовных марках для платформ без IAP
+        vkPrice: 446, // Цена для VK/OK: (99+99+109+119+99) × 0.85 = 446 марок
         contents: {
             rod: 14,     // Удочка Троллинг Pro
             line: 15,    // Леска Океан PE 12
@@ -376,7 +379,30 @@ function getIAPItem(id) {
     const item = IAP_DATABASE.find(item => item.id === id);
     if (!item) return null;
     
-    // Try to get fresh price from SDK
+    const isVKOrOK = isVKOrOKPlatform();
+    
+    // Для VK/OK возвращаем цену в марках
+    if (isVKOrOK && item.type !== 'ad_reward' && item.type !== 'exchange') {
+        let marksPrice;
+        
+        // Для наборов снастей используем предрасчитанную цену или рассчитываем динамически
+        if (item.type === 'gear_bundle' && item.contents) {
+            marksPrice = item.vkPrice || calculateGearBundlePrice(item.contents);
+        } else {
+            // Для остальных товаров используем предрасчитанную цену или конвертируем
+            marksPrice = item.vkPrice || convertIAPPriceToMarks(item.price);
+        }
+        
+        return {
+            ...item,
+            price: marksPrice,
+            currency: 'gems',
+            originalCurrency: 'iap',
+            originalPrice: item.price
+        };
+    }
+    
+    // Для других платформ - стандартная логика с SDK
     if (window.playgamaSDK && window.playgamaSDK.isPaymentsReady) {
         const platform = window.playgamaSDK.platform || 'unknown';
         const platformId = item.platformIds ? item.platformIds[platform] : item.id;
@@ -432,3 +458,103 @@ function loadAdRewardData(data) {
     console.log('✅ Ad reward data loaded:', data);
 }
 
+
+
+/**
+ * Проверяет, является ли текущая платформа VK или OK
+ * @returns {boolean} - true если VK или OK
+ */
+function isVKOrOKPlatform() {
+    if (!window.playgamaSDK || !window.playgamaSDK.platform) {
+        return false;
+    }
+    const platform = window.playgamaSDK.platform.toLowerCase();
+    return platform === 'vk' || platform === 'ok';
+}
+
+/**
+ * Конвертирует IAP цену в рыболовные марки для VK/OK
+ * @param {number} iapPrice - Цена в ЯН
+ * @param {number} conversionRate - Курс конвертации (по умолчанию 7)
+ * @returns {number} - Цена в марках
+ */
+function convertIAPPriceToMarks(iapPrice, conversionRate = 7) {
+    if (typeof iapPrice !== 'number' || iapPrice < 0) {
+        console.warn(`Invalid IAP price: ${iapPrice}, returning 0`);
+        return 0;
+    }
+    if (typeof conversionRate !== 'number' || conversionRate <= 0) {
+        console.warn(`Invalid conversion rate: ${conversionRate}, using default: 7`);
+        conversionRate = 7;
+    }
+    return Math.round(iapPrice * conversionRate);
+}
+
+/**
+ * Рассчитывает цену набора снастей со скидкой
+ * @param {Object} bundleContents - Содержимое набора {rod, line, float, hook, reel}
+ * @param {number} discount - Процент скидки (по умолчанию 0.15 = 15%)
+ * @returns {number} - Финальная цена в марках
+ */
+function calculateGearBundlePrice(bundleContents, discount = 0.15) {
+    if (!bundleContents || typeof bundleContents !== 'object') {
+        console.warn('Invalid bundle contents, returning 0');
+        return 0;
+    }
+    
+    let totalPrice = 0;
+    
+    // Суммируем цены всех снастей
+    if (bundleContents.rod && typeof RODS_DATABASE !== 'undefined') {
+        const rod = RODS_DATABASE.find(r => r.tier === bundleContents.rod);
+        if (rod && rod.price) {
+            totalPrice += rod.price;
+        } else {
+            console.warn(`Rod tier ${bundleContents.rod} not found in database`);
+        }
+    }
+    
+    if (bundleContents.line && typeof LINES_DATABASE !== 'undefined') {
+        const line = LINES_DATABASE.find(l => l.tier === bundleContents.line);
+        if (line && line.price) {
+            totalPrice += line.price;
+        } else {
+            console.warn(`Line tier ${bundleContents.line} not found in database`);
+        }
+    }
+    
+    if (bundleContents.float && typeof FLOATS_DATABASE !== 'undefined') {
+        const float = FLOATS_DATABASE.find(f => f.tier === bundleContents.float);
+        if (float && float.price) {
+            totalPrice += float.price;
+        } else {
+            console.warn(`Float tier ${bundleContents.float} not found in database`);
+        }
+    }
+    
+    if (bundleContents.hook && typeof HOOKS_DATABASE !== 'undefined') {
+        const hook = HOOKS_DATABASE.find(h => h.tier === bundleContents.hook);
+        if (hook && hook.price) {
+            totalPrice += hook.price;
+        } else {
+            console.warn(`Hook tier ${bundleContents.hook} not found in database`);
+        }
+    }
+    
+    if (bundleContents.reel && typeof REELS_DATABASE !== 'undefined') {
+        const reel = REELS_DATABASE.find(r => r.tier === bundleContents.reel);
+        if (reel && reel.price) {
+            totalPrice += reel.price;
+        } else {
+            console.warn(`Reel tier ${bundleContents.reel} not found in database`);
+        }
+    }
+    
+    // Применяем скидку
+    if (typeof discount !== 'number' || discount < 0 || discount > 1) {
+        console.warn(`Invalid discount: ${discount}, using default: 0.15`);
+        discount = 0.15;
+    }
+    
+    return Math.round(totalPrice * (1 - discount));
+}
