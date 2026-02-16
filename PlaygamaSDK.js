@@ -9,18 +9,9 @@
  * Migration from: YandexSDK.js
  */
 
-// Debug: Check what's available globally
-console.log('[PlaygamaSDK] === GLOBAL SDK CHECK ===');
-console.log('[PlaygamaSDK] window.Playgama:', typeof window.Playgama, window.Playgama);
-console.log('[PlaygamaSDK] window.playgama:', typeof window.playgama, window.playgama);
-console.log('[PlaygamaSDK] window.PlaygamaSDK:', typeof window.PlaygamaSDK, window.PlaygamaSDK);
-console.log('[PlaygamaSDK] window.PG:', typeof window.PG, window.PG);
-console.log('[PlaygamaSDK] window.SDK:', typeof window.SDK, window.SDK);
-console.log('[PlaygamaSDK] window.Bridge:', typeof window.Bridge, window.Bridge);
-console.log('[PlaygamaSDK] window.pg:', typeof window.pg, window.pg);
-console.log('[PlaygamaSDK] window.PLAYGAMA:', typeof window.PLAYGAMA, window.PLAYGAMA);
-console.log('[PlaygamaSDK] window.bridge:', typeof window.bridge, window.bridge);
-console.log('[PlaygamaSDK] window.PlaygamaBridge:', typeof window.PlaygamaBridge, window.PlaygamaBridge);
+// Debug: Check what's available globally (disabled in production)
+// console.log('[PlaygamaSDK] === GLOBAL SDK CHECK ===');
+// ... debug logs removed for production
 
 // Try to find SDK in different possible locations
 let detectedSDK = null;
@@ -58,12 +49,12 @@ if (typeof window.bridge !== 'undefined') {
     sdkObject = window.SDK;
 }
 
-console.log('[PlaygamaSDK] Detected SDK location:', detectedSDK);
-if (sdkObject) {
-    console.log('[PlaygamaSDK] SDK object:', sdkObject);
-    console.log('[PlaygamaSDK] SDK methods:', Object.keys(sdkObject));
-}
-console.log('[PlaygamaSDK] === END GLOBAL SDK CHECK ===');
+// console.log('[PlaygamaSDK] Detected SDK location:', detectedSDK);
+// if (sdkObject) {
+//     console.log('[PlaygamaSDK] SDK object:', sdkObject);
+//     console.log('[PlaygamaSDK] SDK methods:', Object.keys(sdkObject));
+// }
+// console.log('[PlaygamaSDK] === END GLOBAL SDK CHECK ===');
 
 class PlaygamaSDKManager {
     constructor() {
@@ -340,7 +331,7 @@ class PlaygamaSDKManager {
      * @returns {Promise<boolean>} - true if initialization successful
      */
     async init() {
-        console.log('[PlaygamaSDK] init() called');
+        // console.log('[PlaygamaSDK] init() called');
         
         // Try to find SDK in multiple locations (Bridge SDK priority)
         let sdkFound = null;
@@ -378,8 +369,8 @@ class PlaygamaSDKManager {
             sdkLocation = 'window.SDK';
         }
         
-        console.log('[PlaygamaSDK] SDK search result:', sdkLocation);
-        console.log('[PlaygamaSDK] SDK object:', sdkFound);
+        // console.log('[PlaygamaSDK] SDK search result:', sdkLocation);
+        // console.log('[PlaygamaSDK] SDK object:', sdkFound);
         
         try {
             // Check if Playgama SDK is available
@@ -398,30 +389,30 @@ class PlaygamaSDKManager {
                 return true;
             }
             
-            console.log('[PlaygamaSDK] Found SDK at:', sdkLocation);
-            console.log('[PlaygamaSDK] SDK methods:', Object.keys(sdkFound));
+            // console.log('[PlaygamaSDK] Found SDK at:', sdkLocation);
+            // console.log('[PlaygamaSDK] SDK methods:', Object.keys(sdkFound));
             
             // Check if SDK has initialize method (Bridge SDK uses initialize, not init)
             if (typeof sdkFound.initialize === 'function') {
-                console.log('[PlaygamaSDK] Calling SDK.initialize()...');
+                // console.log('[PlaygamaSDK] Calling SDK.initialize()...');
                 await sdkFound.initialize();
-                console.log('[PlaygamaSDK] SDK.initialize() completed');
+                // console.log('[PlaygamaSDK] SDK.initialize() completed');
             } else if (typeof sdkFound.init === 'function') {
-                console.log('[PlaygamaSDK] Calling SDK.init()...');
+                // console.log('[PlaygamaSDK] Calling SDK.init()...');
                 await sdkFound.init();
-                console.log('[PlaygamaSDK] SDK.init() completed');
+                // console.log('[PlaygamaSDK] SDK.init() completed');
             } else {
-                console.log('[PlaygamaSDK] SDK does not have init/initialize method, assuming already initialized');
+                // console.log('[PlaygamaSDK] SDK does not have init/initialize method, assuming already initialized');
             }
             
             this.sdk = sdkFound;
             
-            console.log('[PlaygamaSDK] SDK assigned:', this.sdk);
+            // console.log('[PlaygamaSDK] SDK assigned:', this.sdk);
             
             // Detect platform type
             this.platform = this.sdk.platform?.type || this.sdk.platform?.id || 'unknown';
             
-            console.log('[PlaygamaSDK] Platform detected:', this.platform);
+            // console.log('[PlaygamaSDK] Platform detected:', this.platform);
             
             // Detect platform capabilities
             this.platformCapabilities = await this.detectPlatformCapabilities();
@@ -451,7 +442,7 @@ class PlaygamaSDKManager {
             if (this.platformCapabilities.payments) {
                 try {
                     await this.loadCatalog();
-                    console.log('💳 IAP каталог загружен:', this.catalog.length, 'товаров');
+                    // console.log('💳 IAP каталог загружен:', this.catalog.length, 'товаров');
                 } catch (error) {
                     console.error('❌ Ошибка загрузки IAP каталога:', error);
                 }
@@ -560,7 +551,7 @@ class PlaygamaSDKManager {
      * @returns {Promise<boolean>} - true if initialization successful
      */
     async initVKBridge() {
-        console.log('[PlaygamaSDK] 🔵 Инициализация VK Bridge...');
+        // console.log('[PlaygamaSDK] 🔵 Инициализация VK Bridge...');
         
         try {
             // Check if VK Bridge is available (может быть в разных местах)
@@ -568,39 +559,38 @@ class PlaygamaSDKManager {
             
             if (typeof window.vkBridge !== 'undefined') {
                 vkBridgeInstance = window.vkBridge;
-                console.log('[PlaygamaSDK] VK Bridge найден в window.vkBridge');
+                // console.log('[PlaygamaSDK] VK Bridge найден в window.vkBridge');
             } else if (typeof window.VKBridge !== 'undefined') {
                 vkBridgeInstance = window.VKBridge;
-                console.log('[PlaygamaSDK] VK Bridge найден в window.VKBridge');
+                // console.log('[PlaygamaSDK] VK Bridge найден в window.VKBridge');
             } else if (typeof vkBridge !== 'undefined') {
                 vkBridgeInstance = vkBridge;
-                console.log('[PlaygamaSDK] VK Bridge найден в глобальной области');
+                // console.log('[PlaygamaSDK] VK Bridge найден в глобальной области');
             }
             
             if (!vkBridgeInstance) {
                 console.warn('[PlaygamaSDK] ⚠️ VK Bridge SDK не найден');
-                console.log('[PlaygamaSDK] Проверьте, что скрипт VK Bridge загружен в index.html');
                 return false;
             }
             
             this.vkBridge = vkBridgeInstance;
-            console.log('[PlaygamaSDK] VK Bridge объект:', this.vkBridge);
+            // console.log('[PlaygamaSDK] VK Bridge объект:', this.vkBridge);
             
             // Initialize VK Bridge
-            console.log('[PlaygamaSDK] Отправка VKWebAppInit...');
+            // console.log('[PlaygamaSDK] Отправка VKWebAppInit...');
             const initResult = await this.vkBridge.send('VKWebAppInit');
-            console.log('[PlaygamaSDK] VKWebAppInit результат:', initResult);
+            // console.log('[PlaygamaSDK] VKWebAppInit результат:', initResult);
             
             this.isVKBridgeInitialized = true;
-            console.log('[PlaygamaSDK] ✅ VK Bridge инициализирован успешно');
+            // console.log('[PlaygamaSDK] ✅ VK Bridge инициализирован успешно');
             
             // Тестовая проверка Storage API
             try {
-                console.log('[PlaygamaSDK] Тестовая проверка VK Storage API...');
+                // console.log('[PlaygamaSDK] Тестовая проверка VK Storage API...');
                 const testResult = await this.vkBridge.send('VKWebAppStorageGet', {
                     keys: ['_test_key']
                 });
-                console.log('[PlaygamaSDK] ✅ VK Storage API доступен:', testResult);
+                // console.log('[PlaygamaSDK] ✅ VK Storage API доступен:', testResult);
             } catch (testError) {
                 console.warn('[PlaygamaSDK] ⚠️ VK Storage API может быть недоступен:', testError);
             }
@@ -609,7 +599,6 @@ class PlaygamaSDKManager {
             
         } catch (error) {
             console.error('[PlaygamaSDK] ❌ Ошибка инициализации VK Bridge:', error);
-            console.error('[PlaygamaSDK] Детали ошибки:', error.message, error.stack);
             this.isVKBridgeInitialized = false;
             return false;
         }
@@ -629,7 +618,7 @@ class PlaygamaSDKManager {
      * @returns {Promise<boolean>} - true if banner shown successfully
      */
     async showVKBanner() {
-        console.log('[PlaygamaSDK] 📢 Показываем VK баннер...');
+        // console.log('[PlaygamaSDK] 📢 Показываем VK баннер...');
         
         if (!this.isVKBridgeReady()) {
             console.warn('[PlaygamaSDK] ⚠️ VK Bridge не готов для показа баннера');
@@ -641,7 +630,7 @@ class PlaygamaSDKManager {
                 banner_location: 'bottom'
             });
             
-            console.log('[PlaygamaSDK] ✅ VK баннер показан');
+            // console.log('[PlaygamaSDK] ✅ VK баннер показан');
             return true;
             
         } catch (error) {
@@ -656,7 +645,7 @@ class PlaygamaSDKManager {
      * @returns {Promise<boolean>} - true if banner hidden successfully
      */
     async hideVKBanner() {
-        console.log('[PlaygamaSDK] 🔇 Скрываем VK баннер...');
+        // console.log('[PlaygamaSDK] 🔇 Скрываем VK баннер...');
         
         if (!this.isVKBridgeReady()) {
             console.warn('[PlaygamaSDK] ⚠️ VK Bridge не готов');
@@ -666,7 +655,7 @@ class PlaygamaSDKManager {
         try {
             await this.vkBridge.send('VKWebAppHideBannerAd');
             
-            console.log('[PlaygamaSDK] ✅ VK баннер скрыт');
+            // console.log('[PlaygamaSDK] ✅ VK баннер скрыт');
             return true;
             
         } catch (error) {
@@ -683,7 +672,7 @@ class PlaygamaSDKManager {
      * @returns {Promise<boolean>} - true if save successful
      */
     async saveToVKStorage(key, value) {
-        console.log(`[PlaygamaSDK] 💾 Сохранение в VK Storage: ${key}`);
+        // console.log(`[PlaygamaSDK] 💾 Сохранение в VK Storage: ${key}`);
         
         if (!this.isVKBridgeReady()) {
             console.warn('[PlaygamaSDK] ⚠️ VK Bridge не готов, используем localStorage');
@@ -691,33 +680,32 @@ class PlaygamaSDKManager {
             return true;
         }
         
+        // VK Storage requires string values
+        const stringValue = typeof value === 'string' ? value : JSON.stringify(value);
+        
         try {
-            // VK Storage requires string values
-            const stringValue = typeof value === 'string' ? value : JSON.stringify(value);
-            
-            console.log(`[PlaygamaSDK] Отправка VKWebAppStorageSet для ключа: ${key}, длина: ${stringValue.length}`);
+            // console.log(`[PlaygamaSDK] Отправка VKWebAppStorageSet для ключа: ${key}, длина: ${stringValue.length}`);
             
             const result = await this.vkBridge.send('VKWebAppStorageSet', {
                 key: key,
                 value: stringValue
             });
             
-            console.log(`[PlaygamaSDK] ✅ Данные сохранены в VK Storage: ${key}, результат:`, result);
+            // console.log(`[PlaygamaSDK] ✅ Данные сохранены в VK Storage: ${key}, результат:`, result);
             
             // Also backup to localStorage
             localStorage.setItem(`vk_${key}`, stringValue);
-            console.log(`[PlaygamaSDK] ✅ Резервная копия в localStorage: vk_${key}`);
+            // console.log(`[PlaygamaSDK] ✅ Резервная копия в localStorage: vk_${key}`);
             
             return true;
             
         } catch (error) {
             console.error(`[PlaygamaSDK] ❌ Ошибка сохранения в VK Storage (${key}):`, error);
             console.error(`[PlaygamaSDK] Детали ошибки:`, error.message, error.error_data, error.error_type, error.error_code);
-            console.error(`[PlaygamaSDK] Размер данных:`, stringValue?.length || 0, 'символов');
             
             // Fallback to localStorage
-            localStorage.setItem(`vk_${key}`, JSON.stringify(value));
-            console.log(`[PlaygamaSDK] ⚠️ Использован fallback в localStorage`);
+            localStorage.setItem(`vk_${key}`, stringValue);
+            // console.log(`[PlaygamaSDK] ⚠️ Использован fallback в localStorage`);
             return false;
         }
     }
@@ -730,7 +718,7 @@ class PlaygamaSDKManager {
      */
     async loadFromVKStorage(keys) {
         const keyArray = Array.isArray(keys) ? keys : [keys];
-        console.log(`[PlaygamaSDK] 📥 Загрузка из VK Storage:`, keyArray);
+        // console.log(`[PlaygamaSDK] 📥 Загрузка из VK Storage:`, keyArray);
         
         if (!this.isVKBridgeReady()) {
             console.warn('[PlaygamaSDK] ⚠️ VK Bridge не готов, используем localStorage');
@@ -747,24 +735,24 @@ class PlaygamaSDKManager {
                 }
             });
             
-            console.log(`[PlaygamaSDK] Загружено из localStorage:`, Object.keys(result));
+            // console.log(`[PlaygamaSDK] Загружено из localStorage:`, Object.keys(result));
             return result;
         }
         
         try {
-            console.log(`[PlaygamaSDK] Отправка VKWebAppStorageGet для ключей:`, keyArray);
+            // console.log(`[PlaygamaSDK] Отправка VKWebAppStorageGet для ключей:`, keyArray);
             
             const response = await this.vkBridge.send('VKWebAppStorageGet', {
                 keys: keyArray
             });
             
-            console.log(`[PlaygamaSDK] Ответ VKWebAppStorageGet:`, response);
+            // console.log(`[PlaygamaSDK] Ответ VKWebAppStorageGet:`, response);
             
             // Convert response to object
             const result = {};
             if (response.keys && Array.isArray(response.keys)) {
                 response.keys.forEach(item => {
-                    console.log(`[PlaygamaSDK] Обработка ключа: ${item.key}, значение: ${item.value ? item.value.substring(0, 100) : 'null'}`);
+                    // console.log(`[PlaygamaSDK] Обработка ключа: ${item.key}, значение: ${item.value ? item.value.substring(0, 100) : 'null'}`);
                     
                     if (item.value) {
                         try {
@@ -777,13 +765,12 @@ class PlaygamaSDKManager {
                 });
             }
             
-            console.log(`[PlaygamaSDK] ✅ Данные загружены из VK Storage:`, Object.keys(result));
+            // console.log(`[PlaygamaSDK] ✅ Данные загружены из VK Storage:`, Object.keys(result));
             
             return result;
             
         } catch (error) {
             console.error('[PlaygamaSDK] ❌ Ошибка загрузки из VK Storage:', error);
-            console.error('[PlaygamaSDK] Детали ошибки:', error.message, error.error_data);
             
             // Fallback to localStorage
             const result = {};
@@ -798,7 +785,7 @@ class PlaygamaSDKManager {
                 }
             });
             
-            console.log(`[PlaygamaSDK] ⚠️ Использован fallback в localStorage:`, Object.keys(result));
+            // console.log(`[PlaygamaSDK] ⚠️ Использован fallback в localStorage:`, Object.keys(result));
             return result;
         }
     }
@@ -810,7 +797,7 @@ class PlaygamaSDKManager {
      * @returns {Promise<boolean>} - true if save successful
      */
     async savePlayerDataToVK(updates) {
-        console.log('[PlaygamaSDK] 💾 Сохранение данных игрока в VK Cloud...');
+        // console.log('[PlaygamaSDK] 💾 Сохранение данных игрока в VK Cloud...');
         
         if (!this.isVKBridgeReady()) {
             console.warn('[PlaygamaSDK] ⚠️ VK Bridge не готов');
@@ -831,12 +818,12 @@ class PlaygamaSDKManager {
             const mergedData = { ...currentData, ...updates };
             
             // Save as single key
-            console.log('[PlaygamaSDK] 💾 Сохранение всех данных в один ключ:', gameDataKey);
-            console.log('[PlaygamaSDK] 💾 Количество полей:', Object.keys(mergedData).length);
+            // console.log('[PlaygamaSDK] 💾 Сохранение всех данных в один ключ:', gameDataKey);
+            // console.log('[PlaygamaSDK] 💾 Количество полей:', Object.keys(mergedData).length);
             
             await this.saveToVKStorage(gameDataKey, mergedData);
             
-            console.log('[PlaygamaSDK] ✅ Данные игрока сохранены в VK Cloud');
+            // console.log('[PlaygamaSDK] ✅ Данные игрока сохранены в VK Cloud');
             return true;
             
         } catch (error) {
@@ -851,7 +838,7 @@ class PlaygamaSDKManager {
      * @returns {Promise<Object>} - Player data object
      */
     async loadPlayerDataFromVK() {
-        console.log('[PlaygamaSDK] 📥 Загрузка данных игрока из VK Cloud...');
+        // console.log('[PlaygamaSDK] 📥 Загрузка данных игрока из VK Cloud...');
         
         if (!this.isVKBridgeReady()) {
             console.warn('[PlaygamaSDK] ⚠️ VK Bridge не готов');
@@ -866,8 +853,8 @@ class PlaygamaSDKManager {
             
             const gameData = data[gameDataKey] || {};
             
-            console.log('[PlaygamaSDK] ✅ Данные игрока загружены из VK Cloud');
-            console.log('[PlaygamaSDK] 📊 Количество полей:', Object.keys(gameData).length);
+            // console.log('[PlaygamaSDK] ✅ Данные игрока загружены из VK Cloud');
+            // console.log('[PlaygamaSDK] 📊 Количество полей:', Object.keys(gameData).length);
             
             return gameData;
             
@@ -923,10 +910,10 @@ class PlaygamaSDKManager {
      * @returns {Promise<boolean>} - true if save successful
      */
     async saveData(data, flush = true) {
-        console.log('[PlaygamaSDK] ========== SAVEDATA ВЫЗВАН ==========');
-        console.log('[PlaygamaSDK] Платформа:', this.platform);
-        console.log('[PlaygamaSDK] VK Bridge готов:', this.isVKBridgeReady());
-        console.log('[PlaygamaSDK] Данные для сохранения:', Object.keys(data));
+        // console.log('[PlaygamaSDK] ========== SAVEDATA ВЫЗВАН ==========');
+        // console.log('[PlaygamaSDK] Платформа:', this.platform);
+        // console.log('[PlaygamaSDK] VK Bridge готов:', this.isVKBridgeReady());
+        // console.log('[PlaygamaSDK] Данные для сохранения:', Object.keys(data));
         
         // Validate input
         if (!data || typeof data !== 'object') {
@@ -939,26 +926,26 @@ class PlaygamaSDKManager {
         if (!localSaveSuccess) {
             console.warn('⚠️ Failed to backup to localStorage');
         } else {
-            console.log('[PlaygamaSDK] ✅ Резервная копия в localStorage сохранена');
+            // console.log('[PlaygamaSDK] ✅ Резервная копия в localStorage сохранена');
         }
         
         // VK Platform: Use VK Bridge Storage (priority over Playgama storage)
         if (this.platform === 'vk' && this.isVKBridgeReady()) {
-            console.log('[PlaygamaSDK] 💾 Сохранение через VK Bridge Storage...');
+            // console.log('[PlaygamaSDK] 💾 Сохранение через VK Bridge Storage...');
             
             try {
                 await this.savePlayerDataToVK(data);
-                console.log('[PlaygamaSDK] ✅ Данные сохранены через VK Bridge');
-                console.log('[PlaygamaSDK] ========== SAVEDATA ЗАВЕРШЕН (VK Bridge) ==========');
+                // console.log('[PlaygamaSDK] ✅ Данные сохранены через VK Bridge');
+                // console.log('[PlaygamaSDK] ========== SAVEDATA ЗАВЕРШЕН (VK Bridge) ==========');
                 return true;
             } catch (error) {
                 console.error('[PlaygamaSDK] ❌ Ошибка сохранения через VK Bridge:', error);
                 // Continue to Playgama storage fallback
             }
         } else {
-            console.log('[PlaygamaSDK] ⚠️ VK Bridge НЕ используется. Причина:');
-            console.log('[PlaygamaSDK]   - Платформа === "vk"?', this.platform === 'vk');
-            console.log('[PlaygamaSDK]   - VK Bridge готов?', this.isVKBridgeReady());
+            // console.log('[PlaygamaSDK] ⚠️ VK Bridge НЕ используется. Причина:');
+            // console.log('[PlaygamaSDK]   - Платформа === "vk"?', this.platform === 'vk');
+            // console.log('[PlaygamaSDK]   - VK Bridge готов?', this.isVKBridgeReady());
         }
         
         // If SDK not available or cloud saves not supported, use localStorage only (Requirement 3.3)
@@ -993,14 +980,14 @@ class PlaygamaSDKManager {
      * @returns {Promise<Object>} - Loaded data
      */
     async loadData(keys = null) {
-        console.log('[PlaygamaSDK] ========== LOADDATA ВЫЗВАН ==========');
-        console.log('[PlaygamaSDK] Платформа:', this.platform);
-        console.log('[PlaygamaSDK] VK Bridge готов:', this.isVKBridgeReady());
-        console.log('[PlaygamaSDK] Запрошенные ключи:', keys);
+        // console.log('[PlaygamaSDK] ========== LOADDATA ВЫЗВАН ==========');
+        // console.log('[PlaygamaSDK] Платформа:', this.platform);
+        // console.log('[PlaygamaSDK] VK Bridge готов:', this.isVKBridgeReady());
+        // console.log('[PlaygamaSDK] Запрошенные ключи:', keys);
         
         // VK Platform: Use VK Bridge Storage (priority over Playgama storage)
         if (this.platform === 'vk' && this.isVKBridgeReady()) {
-            console.log('[PlaygamaSDK] 📥 Загрузка через VK Bridge Storage...');
+            // console.log('[PlaygamaSDK] 📥 Загрузка через VK Bridge Storage...');
             
             try {
                 const vkData = await this.loadPlayerDataFromVK();
@@ -1009,32 +996,32 @@ class PlaygamaSDKManager {
                 const isVKEmpty = !vkData || Object.keys(vkData).length === 0;
                 
                 if (isVKEmpty) {
-                    console.log('[PlaygamaSDK] ⚠️ VK Storage пуст, проверяем localStorage...');
+                    // console.log('[PlaygamaSDK] ⚠️ VK Storage пуст, проверяем localStorage...');
                     
                     // Load from localStorage
                     const localData = this.loadFromLocalStorage();
                     const isLocalEmpty = !localData || Object.keys(localData).length === 0;
                     
                     if (!isLocalEmpty) {
-                        console.log('[PlaygamaSDK] 📤 Загружаем данные из localStorage в VK Storage...');
+                        // console.log('[PlaygamaSDK] 📤 Загружаем данные из localStorage в VK Storage...');
                         
                         // Upload localStorage data to VK Storage
                         try {
                             await this.savePlayerDataToVK(localData);
-                            console.log('[PlaygamaSDK] ✅ Данные из localStorage загружены в VK Storage');
+                            // console.log('[PlaygamaSDK] ✅ Данные из localStorage загружены в VK Storage');
                         } catch (uploadError) {
                             console.error('[PlaygamaSDK] ❌ Ошибка загрузки в VK Storage:', uploadError);
                         }
                         
-                        console.log('[PlaygamaSDK] ========== LOADDATA ЗАВЕРШЕН (localStorage -> VK) ==========');
+                        // console.log('[PlaygamaSDK] ========== LOADDATA ЗАВЕРШЕН (localStorage -> VK) ==========');
                         return localData;
                     }
                     
-                    console.log('[PlaygamaSDK] ========== LOADDATA ЗАВЕРШЕН (пусто) ==========');
+                    // console.log('[PlaygamaSDK] ========== LOADDATA ЗАВЕРШЕН (пусто) ==========');
                     return {};
                 }
                 
-                console.log('[PlaygamaSDK] ✅ Данные загружены через VK Bridge, ключей:', Object.keys(vkData).length);
+                // console.log('[PlaygamaSDK] ✅ Данные загружены через VK Bridge, ключей:', Object.keys(vkData).length);
                 
                 // Filter by keys if specified
                 if (keys && Array.isArray(keys)) {
@@ -1044,11 +1031,11 @@ class PlaygamaSDKManager {
                             filteredData[key] = vkData[key];
                         }
                     });
-                    console.log('[PlaygamaSDK] ========== LOADDATA ЗАВЕРШЕН (VK Bridge, filtered) ==========');
+                    // console.log('[PlaygamaSDK] ========== LOADDATA ЗАВЕРШЕН (VK Bridge, filtered) ==========');
                     return filteredData;
                 }
                 
-                console.log('[PlaygamaSDK] ========== LOADDATA ЗАВЕРШЕН (VK Bridge) ==========');
+                // console.log('[PlaygamaSDK] ========== LOADDATA ЗАВЕРШЕН (VK Bridge) ==========');
                 return vkData;
                 
             } catch (error) {
@@ -1056,9 +1043,9 @@ class PlaygamaSDKManager {
                 // Continue to Playgama storage fallback
             }
         } else {
-            console.log('[PlaygamaSDK] ⚠️ VK Bridge НЕ используется. Причина:');
-            console.log('[PlaygamaSDK]   - Платформа === "vk"?', this.platform === 'vk');
-            console.log('[PlaygamaSDK]   - VK Bridge готов?', this.isVKBridgeReady());
+            // console.log('[PlaygamaSDK] ⚠️ VK Bridge НЕ используется. Причина:');
+            // console.log('[PlaygamaSDK]   - Платформа === "vk"?', this.platform === 'vk');
+            // console.log('[PlaygamaSDK]   - VK Bridge готов?', this.isVKBridgeReady());
         }
         
         // If SDK not available or cloud saves not supported, use localStorage only (Requirement 3.3)
@@ -2301,29 +2288,29 @@ class PlaygamaSDKManager {
 }
 
 // Create global instance
-console.log('[PlaygamaSDK] Creating global instance...');
-console.log('[PlaygamaSDK] Checking available global objects:');
-console.log('[PlaygamaSDK] - window.Playgama:', typeof window.Playgama);
-console.log('[PlaygamaSDK] - window.playgama:', typeof window.playgama);
-console.log('[PlaygamaSDK] - window.PlaygamaSDK:', typeof window.PlaygamaSDK);
-console.log('[PlaygamaSDK] - window.SDK:', typeof window.SDK);
-console.log('[PlaygamaSDK] - window.PG:', typeof window.PG);
-console.log('[PlaygamaSDK] - window.Bridge:', typeof window.Bridge);
-console.log('[PlaygamaSDK] - window.pg:', typeof window.pg);
-console.log('[PlaygamaSDK] - window.PLAYGAMA:', typeof window.PLAYGAMA);
+// console.log('[PlaygamaSDK] Creating global instance...');
+// console.log('[PlaygamaSDK] Checking available global objects:');
+// console.log('[PlaygamaSDK] - window.Playgama:', typeof window.Playgama);
+// console.log('[PlaygamaSDK] - window.playgama:', typeof window.playgama);
+// console.log('[PlaygamaSDK] - window.PlaygamaSDK:', typeof window.PlaygamaSDK);
+// console.log('[PlaygamaSDK] - window.SDK:', typeof window.SDK);
+// console.log('[PlaygamaSDK] - window.PG:', typeof window.PG);
+// console.log('[PlaygamaSDK] - window.Bridge:', typeof window.Bridge);
+// console.log('[PlaygamaSDK] - window.pg:', typeof window.pg);
+// console.log('[PlaygamaSDK] - window.PLAYGAMA:', typeof window.PLAYGAMA);
 
 // Log ALL window properties that might be SDK-related
-const allKeys = Object.keys(window);
-const sdkRelated = allKeys.filter(k => 
-    k.toLowerCase().includes('play') || 
-    k.toLowerCase().includes('game') || 
-    k.toLowerCase().includes('sdk') ||
-    k.toLowerCase().includes('bridge') ||
-    k.toLowerCase().includes('pg')
-);
-console.log('[PlaygamaSDK] All SDK-related window keys:', sdkRelated);
+// const allKeys = Object.keys(window);
+// const sdkRelated = allKeys.filter(k => 
+//     k.toLowerCase().includes('play') || 
+//     k.toLowerCase().includes('game') || 
+//     k.toLowerCase().includes('sdk') ||
+//     k.toLowerCase().includes('bridge') ||
+//     k.toLowerCase().includes('pg')
+// );
+// console.log('[PlaygamaSDK] All SDK-related window keys:', sdkRelated);
 
 window.playgamaSDK = new PlaygamaSDKManager();
 
-console.log('[PlaygamaSDK] Global instance created:', window.playgamaSDK);
-console.log('[PlaygamaSDK] Ready for initialization');
+// console.log('[PlaygamaSDK] Global instance created:', window.playgamaSDK);
+// console.log('[PlaygamaSDK] Ready for initialization');
