@@ -7,7 +7,10 @@
  * 
  * Created: 2026-02-09
  * Migration from: YandexSDK.js
+ * Version: 2.0.1 (VK Storage Fix with Debug Logs)
  */
+
+console.log('[PlaygamaSDK] 🚀 VERSION 2.0.1 LOADED - VK Storage Fix with Debug Logs');
 
 // Debug: Check what's available globally (disabled in production)
 // console.log('[PlaygamaSDK] === GLOBAL SDK CHECK ===');
