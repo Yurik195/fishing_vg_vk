@@ -1077,12 +1077,22 @@ class PlaygamaSDKManager {
                 
             } catch (error) {
                 console.error('[PlaygamaSDK] ❌ Ошибка загрузки через VK Bridge:', error);
-                // Continue to Playgama storage fallback
+                // Fallback to localStorage on VK Bridge error
+                const localData = this.loadFromLocalStorage();
+                
+                // Filter by keys if specified
+                if (keys && Array.isArray(keys)) {
+                    const filteredData = {};
+                    keys.forEach(key => {
+                        if (localData.hasOwnProperty(key)) {
+                            filteredData[key] = localData[key];
+                        }
+                    });
+                    return filteredData;
+                }
+                
+                return localData;
             }
-        } else {
-            // console.log('[PlaygamaSDK] ⚠️ VK Bridge НЕ используется. Причина:');
-            // console.log('[PlaygamaSDK]   - Платформа === "vk"?', this.platform === 'vk');
-            // console.log('[PlaygamaSDK]   - VK Bridge готов?', this.isVKBridgeReady());
         }
         
         // If SDK not available or cloud saves not supported, use localStorage only (Requirement 3.3)
