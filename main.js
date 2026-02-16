@@ -726,6 +726,10 @@ class Game {
             
             console.log('✅ Все игровые данные восстановлены');
             
+            // ИСПРАВЛЕНИЕ: Сохраняем данные после загрузки, чтобы синхронизировать localStorage и VK Storage
+            // Это важно для первого запуска, когда данные есть в localStorage, но нет в VK Storage
+            await this.saveGameData();
+            
             // Запускаем фоновую загрузку всех рыб из облака
             this.preloadAllFishInBackground();
         } catch (error) {
@@ -821,6 +825,12 @@ class Game {
             // Проверяем что fishingGame полностью инициализирован
             if (!this.fishingGame || this.fishingGame.coins === undefined) {
                 console.log('[Game] Пропуск сохранения - fishingGame еще не инициализирован');
+                return;
+            }
+            
+            // ИСПРАВЛЕНИЕ: Ждем инициализации SDK перед первым сохранением
+            if (!this.sdkInitialized && window.playgamaSDK && !window.playgamaSDK.isInitialized) {
+                console.log('[Game] Пропуск сохранения - SDK еще не инициализирован, данные будут сохранены после инициализации');
                 return;
             }
             
