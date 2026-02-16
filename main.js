@@ -648,43 +648,60 @@ class Game {
                 console.log('✅ Коллекция восстановлена из облака');
             }
             
-            // Восстанавливаем квесты
+            // Восстанавливаем квесты - ОПТИМИЗИРОВАНО
             if (data.quests && window.questSystem) {
-                if (data.quests.dailyQuests) window.questSystem.dailyQuests = data.quests.dailyQuests;
-                if (data.quests.weeklyQuests) window.questSystem.weeklyQuests = data.quests.weeklyQuests;
+                // Восстанавливаем даты сброса и завершенные квесты
                 if (data.quests.lastDailyReset) window.questSystem.lastDailyReset = data.quests.lastDailyReset;
                 if (data.quests.lastWeeklyReset) window.questSystem.lastWeeklyReset = data.quests.lastWeeklyReset;
                 if (data.quests.completedDaily) window.questSystem.completedDaily = new Set(data.quests.completedDaily);
                 if (data.quests.completedWeekly) window.questSystem.completedWeekly = new Set(data.quests.completedWeekly);
+                
+                // Восстанавливаем прогресс квестов (если квесты уже сгенерированы)
+                if (data.quests.dailyProgress && window.questSystem.dailyQuests) {
+                    data.quests.dailyProgress.forEach(progress => {
+                        const quest = window.questSystem.dailyQuests.find(q => q.id === progress.id);
+                        if (quest) quest.currentAmount = progress.current;
+                    });
+                }
+                if (data.quests.weeklyProgress && window.questSystem.weeklyQuests) {
+                    data.quests.weeklyProgress.forEach(progress => {
+                        const quest = window.questSystem.weeklyQuests.find(q => q.id === progress.id);
+                        if (quest) quest.currentAmount = progress.current;
+                    });
+                }
+                
                 console.log('✅ Квесты восстановлены из облака');
             }
             
-            // Восстанавливаем трофеи
+            // Восстанавливаем трофеи - ОПТИМИЗИРОВАНО
             if (data.trophies && this.trophySystem) {
-                if (data.trophies.trophies) this.trophySystem.trophies = data.trophies.trophies;
-                if (data.trophies.installedTrophies) this.trophySystem.installedTrophies = data.trophies.installedTrophies;
-                if (data.trophies.slots) this.trophySystem.slots = data.trophies.slots;
+                // Восстанавливаем трофеи по ID (полные данные есть в системе)
+                if (data.trophies.trophyIds) {
+                    // Трофеи восстановятся из базы данных по ID
+                    this.trophySystem.trophies = data.trophies.trophyIds.map(id => 
+                        this.trophySystem.trophies.find(t => t.id === id)
+                    ).filter(Boolean);
+                }
+                if (data.trophies.unlockedSlots) {
+                    this.trophySystem.slots.forEach(slot => {
+                        slot.unlocked = data.trophies.unlockedSlots.includes(slot.id);
+                    });
+                }
                 console.log('✅ Трофеи восстановлены из облака');
             }
             
-            // Восстанавливаем профиль
+            // Восстанавливаем профиль - ОПТИМИЗИРОВАНО
             if (data.profile && this.profileSystem) {
-                if (data.profile.stats) {
-                    this.profileSystem.stats = { ...this.profileSystem.stats, ...data.profile.stats };
-                }
+                // Восстанавливаем только критичные поля
+                if (data.profile.level !== undefined) this.profileSystem.stats.level = data.profile.level;
+                if (data.profile.xp !== undefined) this.profileSystem.stats.xp = data.profile.xp;
+                if (data.profile.totalFishCaught !== undefined) this.profileSystem.stats.totalFishCaught = data.profile.totalFishCaught;
+                if (data.profile.heaviestFish) this.profileSystem.stats.heaviestFish = data.profile.heaviestFish;
                 console.log('✅ Профиль восстановлен из облака');
             }
             
-            // Восстанавливаем рынок
-            if (data.market && this.marketSystem) {
-                if (data.market.priceMultipliers) {
-                    this.marketSystem.priceMultipliers = new Map(Object.entries(data.market.priceMultipliers));
-                }
-                if (data.market.lastUpdateTime) {
-                    this.marketSystem.lastUpdateTime = data.market.lastUpdateTime;
-                }
-                console.log('✅ Рынок восстановлен из облака');
-            }
+            // Рынок НЕ восстанавливаем - генерируется заново
+            // (цены обновляются каждый час)
             
             // Восстанавливаем ежедневные награды
             if (data.dailyRewards && window.dailyRewardsSystem) {
@@ -862,33 +879,34 @@ class Game {
                     caughtItems: Array.from(this.collectionSystem.caughtItems)
                 },
                 
-                // Квесты
+                // Квесты - ОПТИМИЗИРОВАНО: сохраняем только прогресс
                 quests: window.questSystem ? {
-                    dailyQuests: window.questSystem.dailyQuests,
-                    weeklyQuests: window.questSystem.weeklyQuests,
                     lastDailyReset: window.questSystem.lastDailyReset,
                     lastWeeklyReset: window.questSystem.lastWeeklyReset,
                     completedDaily: Array.from(window.questSystem.completedDaily),
-                    completedWeekly: Array.from(window.questSystem.completedWeekly)
+                    completedWeekly: Array.from(window.questSystem.completedWeekly),
+                    // Сохраняем только прогресс квестов (currentAmount), остальное генерируется заново
+                    dailyProgress: window.questSystem.dailyQuests.map(q => ({id: q.id, current: q.currentAmount})),
+                    weeklyProgress: window.questSystem.weeklyQuests.map(q => ({id: q.id, current: q.currentAmount}))
                 } : null,
                 
-                // Трофеи
+                // Трофеи - ОПТИМИЗИРОВАНО: сохраняем только ID
                 trophies: this.trophySystem ? {
-                    trophies: this.trophySystem.trophies,
-                    installedTrophies: this.trophySystem.installedTrophies,
-                    slots: this.trophySystem.slots
+                    trophyIds: this.trophySystem.trophies.map(t => t.id),
+                    installedTrophyIds: Object.values(this.trophySystem.installedTrophies).map(t => t?.id).filter(Boolean),
+                    unlockedSlots: this.trophySystem.slots.filter(s => s.unlocked).map(s => s.id)
                 } : null,
                 
-                // Профиль
+                // Профиль - ОПТИМИЗИРОВАНО: только критичные поля
                 profile: this.profileSystem ? {
-                    stats: this.profileSystem.stats
+                    level: this.profileSystem.stats.level,
+                    xp: this.profileSystem.stats.xp,
+                    totalFishCaught: this.profileSystem.stats.totalFishCaught,
+                    heaviestFish: this.profileSystem.stats.heaviestFish
                 } : null,
                 
-                // Рынок
-                market: this.marketSystem ? {
-                    priceMultipliers: Object.fromEntries(this.marketSystem.priceMultipliers),
-                    lastUpdateTime: this.marketSystem.lastUpdateTime
-                } : null,
+                // Рынок - НЕ СОХРАНЯЕМ: генерируется заново каждый час
+                // market: null,
                 
                 // Ежедневные награды
                 dailyRewards: window.dailyRewardsSystem ? {
