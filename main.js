@@ -918,7 +918,14 @@ class Game {
             console.log('💾 Платформа:', window.playgamaSDK?.platform);
             console.log('💾 VK Bridge готов:', window.playgamaSDK?.isVKBridgeReady());
             
-            if (this.sdkInitialized) {
+            // ИСПРАВЛЕНИЕ: Проверяем не только sdkInitialized, но и наличие playgamaSDK
+            const canUseSdk = window.playgamaSDK && 
+                             window.playgamaSDK.isInitialized && 
+                             typeof window.playgamaSDK.saveData === 'function';
+            
+            console.log('💾 Можем использовать SDK для сохранения:', canUseSdk);
+            
+            if (canUseSdk) {
                 // Сохраняем в облако
                 console.log('💾 Вызываем saveData()...');
                 const success = await window.playgamaSDK.saveData(data, true);
