@@ -924,6 +924,8 @@ class Game {
                 tutorialCompleted: data.tutorial?.tutorialCompleted
             });
             
+            console.log('📊 Все ключи данных:', Object.keys(data));
+            
             console.log('💾 SDK инициализирован:', this.sdkInitialized);
             console.log('💾 Платформа:', window.playgamaSDK?.platform);
             console.log('💾 VK Bridge готов:', window.playgamaSDK?.isVKBridgeReady());
