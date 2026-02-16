@@ -28,6 +28,7 @@ class Game {
         // Таймер для fullscreen рекламы (не сохраняется)
         this.lastFullscreenAdTime = 0;
         this.fullscreenAdCooldown = 90000; // 90 секунд
+        this.firstFishingVisit = true; // Флаг первого входа в рыбалку
         
         // Последнее время суток для отслеживания изменений
         this.lastTimeOfDay = null;
@@ -536,9 +537,12 @@ class Game {
             console.log('🔄 Начинаем загрузку игровых данных...');
             console.log('🔄 SDK инициализирован:', this.sdkInitialized);
             console.log('🔄 Player готов:', window.playgamaSDK?.isPlayerReady);
+            console.log('🔄 Платформа:', window.playgamaSDK?.platform);
+            console.log('🔄 VK Bridge готов:', window.playgamaSDK?.isVKBridgeReady());
             
             if (this.sdkInitialized) {
                 // Загружаем из облака
+                console.log('📥 Вызываем loadData()...');
                 data = await window.playgamaSDK.loadData();
                 console.log('📥 Данные загружены из облака, ключей:', Object.keys(data).length);
                 
@@ -910,8 +914,13 @@ class Game {
                 tutorialCompleted: data.tutorial?.tutorialCompleted
             });
             
+            console.log('💾 SDK инициализирован:', this.sdkInitialized);
+            console.log('💾 Платформа:', window.playgamaSDK?.platform);
+            console.log('💾 VK Bridge готов:', window.playgamaSDK?.isVKBridgeReady());
+            
             if (this.sdkInitialized) {
                 // Сохраняем в облако
+                console.log('💾 Вызываем saveData()...');
                 const success = await window.playgamaSDK.saveData(data, true);
                 if (success) {
                     console.log('✅ Все данные сохранены в облако');
@@ -937,9 +946,10 @@ class Game {
     
     /**
      * Показать fullscreen рекламу если прошло достаточно времени
+     * @param {boolean} isFishingEntry - Вход в рыбалку (не показываем при первом входе)
      * @returns {Promise<boolean>} - true если реклама была показана
      */
-    async tryShowFullscreenAd() {
+    async tryShowFullscreenAd(isFishingEntry = false) {
         if (!this.sdkInitialized) {
             return false;
         }
@@ -947,9 +957,15 @@ class Game {
         const now = Date.now();
         const timeSinceGameStart = now - this.gameStartTime;
         
-        // Не показываем рекламу если игрок в игре меньше 1 минуты
-        if (timeSinceGameStart < 60000) {
-            console.log(`⏱️ Реклама не показана: игрок в игре ${Math.ceil(timeSinceGameStart / 1000)}с (нужно 60с)`);
+        // Не показываем рекламу если игрок в игре меньше 90 секунд
+        if (timeSinceGameStart < 90000) {
+            console.log(`⏱️ Реклама не показана: игрок в игре ${Math.ceil(timeSinceGameStart / 1000)}с (нужно 90с)`);
+            return false;
+        }
+        
+        // Не показываем рекламу при первом входе в рыбалку
+        if (isFishingEntry && this.firstFishingVisit) {
+            console.log('⏱️ Реклама не показана: первый вход в рыбалку');
             return false;
         }
         
@@ -1077,8 +1093,11 @@ class Game {
         } else if (screen === 'fishing') {
             // Переключаемся на рыбалку
             
-            // Показываем fullscreen рекламу перед рыбалкой
-            this.tryShowFullscreenAd();
+            // Показываем fullscreen рекламу перед рыбалкой (но не при первом входе)
+            this.tryShowFullscreenAd(true);
+            
+            // Сбрасываем флаг первого входа в рыбалку
+            this.firstFishingVisit = false;
             
             // Если currentZone не установлена, устанавливаем первую разблокированную зону
             if (!this.fishingGame.currentZone) {
