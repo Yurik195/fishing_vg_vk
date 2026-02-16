@@ -849,25 +849,16 @@ class PlaygamaSDKManager {
         }
         
         try {
-            // ИСПРАВЛЕНИЕ: Сохраняем все данные в ОДИН ключ вместо множества отдельных
-            // Это избегает flood control от VK (error_code: 9)
+            // ИСПРАВЛЕНИЕ: НЕ загружаем старые данные, а просто перезаписываем
+            // Это решает проблему с 4096 полями из старого формата
             
             const gameDataKey = 'fishingGameData';
             
-            // Load current data first
-            console.log('[PlaygamaSDK] 📥 Загружаем текущие данные перед слиянием...');
-            const currentDataResult = await this.loadFromVKStorage([gameDataKey]);
-            const currentData = currentDataResult[gameDataKey] || {};
-            console.log('[PlaygamaSDK] 📊 Текущих полей в облаке:', Object.keys(currentData).length);
+            // Сохраняем только новые данные (без слияния со старыми)
+            console.log('[PlaygamaSDK] 💾 Сохранение данных без слияния со старыми');
+            console.log('[PlaygamaSDK] 💾 Количество полей для сохранения:', Object.keys(updates).length);
             
-            // Merge with updates
-            const mergedData = { ...currentData, ...updates };
-            console.log('[PlaygamaSDK] 📊 После слияния полей:', Object.keys(mergedData).length);
-            
-            // Save as single key
-            console.log('[PlaygamaSDK] 💾 Сохранение всех данных в один ключ:', gameDataKey);
-            
-            await this.saveToVKStorage(gameDataKey, mergedData);
+            await this.saveToVKStorage(gameDataKey, updates);
             
             console.log('[PlaygamaSDK] ✅ Данные игрока сохранены в VK Cloud');
             return true;
