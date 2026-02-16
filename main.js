@@ -928,7 +928,14 @@ class Game {
             if (canUseSdk) {
                 // Сохраняем в облако
                 console.log('💾 Вызываем saveData()...');
+                console.log('💾 window.playgamaSDK:', window.playgamaSDK);
+                console.log('💾 typeof saveData:', typeof window.playgamaSDK.saveData);
+                console.log('💾 Данные для передачи, ключей:', Object.keys(data).length);
+                
                 const success = await window.playgamaSDK.saveData(data, true);
+                
+                console.log('💾 saveData() вернул:', success);
+                
                 if (success) {
                     console.log('✅ Все данные сохранены в облако');
                 } else {
