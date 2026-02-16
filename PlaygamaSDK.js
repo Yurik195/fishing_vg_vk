@@ -730,7 +730,19 @@ class PlaygamaSDKManager {
                 const value = localStorage.getItem(`vk_${key}`);
                 if (value) {
                     try {
-                        result[key] = JSON.parse(value);
+                        // Первая попытка парсинга
+                        let parsed = JSON.parse(value);
+                        
+                        // ИСПРАВЛЕНИЕ: Если результат - строка, пробуем распарсить еще раз
+                        if (typeof parsed === 'string') {
+                            try {
+                                parsed = JSON.parse(parsed);
+                            } catch (e) {
+                                // Если второй парсинг не удался, оставляем строку
+                            }
+                        }
+                        
+                        result[key] = parsed;
                     } catch (e) {
                         result[key] = value;
                     }
@@ -758,9 +770,23 @@ class PlaygamaSDKManager {
                     
                     if (item.value) {
                         try {
-                            result[item.key] = JSON.parse(item.value);
+                            // Первая попытка парсинга
+                            let parsed = JSON.parse(item.value);
+                            
+                            // ИСПРАВЛЕНИЕ: Если результат - строка, пробуем распарсить еще раз
+                            // (на случай двойного stringify из старых сохранений)
+                            if (typeof parsed === 'string') {
+                                try {
+                                    parsed = JSON.parse(parsed);
+                                    // console.log(`[PlaygamaSDK] ✅ Исправлен двойной stringify для ключа ${item.key}`);
+                                } catch (e) {
+                                    // Если второй парсинг не удался, оставляем строку
+                                }
+                            }
+                            
+                            result[item.key] = parsed;
                         } catch (e) {
-                            console.warn(`[PlaygamaSDK] ⚠️ Не удалось распарсить JSON для ключа ${item.key}, используем как строку`);
+                            // console.warn(`[PlaygamaSDK] ⚠️ Не удалось распарсить JSON для ключа ${item.key}, используем как строку`);
                             result[item.key] = item.value;
                         }
                     }
@@ -780,7 +806,19 @@ class PlaygamaSDKManager {
                 const value = localStorage.getItem(`vk_${key}`);
                 if (value) {
                     try {
-                        result[key] = JSON.parse(value);
+                        // Первая попытка парсинга
+                        let parsed = JSON.parse(value);
+                        
+                        // ИСПРАВЛЕНИЕ: Если результат - строка, пробуем распарсить еще раз
+                        if (typeof parsed === 'string') {
+                            try {
+                                parsed = JSON.parse(parsed);
+                            } catch (e) {
+                                // Если второй парсинг не удался, оставляем строку
+                            }
+                        }
+                        
+                        result[key] = parsed;
                     } catch (e) {
                         result[key] = value;
                     }
