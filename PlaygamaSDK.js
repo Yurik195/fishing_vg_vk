@@ -837,7 +837,8 @@ class PlaygamaSDKManager {
      * @returns {Promise<boolean>} - true if save successful
      */
     async savePlayerDataToVK(updates) {
-        // console.log('[PlaygamaSDK] 💾 Сохранение данных игрока в VK Cloud...');
+        console.log('[PlaygamaSDK] 💾 Сохранение данных игрока в VK Cloud...');
+        console.log('[PlaygamaSDK] 💾 Количество обновляемых полей:', Object.keys(updates).length);
         
         if (!this.isVKBridgeReady()) {
             console.warn('[PlaygamaSDK] ⚠️ VK Bridge не готов');
@@ -851,19 +852,21 @@ class PlaygamaSDKManager {
             const gameDataKey = 'fishingGameData';
             
             // Load current data first
+            console.log('[PlaygamaSDK] 📥 Загружаем текущие данные перед слиянием...');
             const currentDataResult = await this.loadFromVKStorage([gameDataKey]);
             const currentData = currentDataResult[gameDataKey] || {};
+            console.log('[PlaygamaSDK] 📊 Текущих полей в облаке:', Object.keys(currentData).length);
             
             // Merge with updates
             const mergedData = { ...currentData, ...updates };
+            console.log('[PlaygamaSDK] 📊 После слияния полей:', Object.keys(mergedData).length);
             
             // Save as single key
-            // console.log('[PlaygamaSDK] 💾 Сохранение всех данных в один ключ:', gameDataKey);
-            // console.log('[PlaygamaSDK] 💾 Количество полей:', Object.keys(mergedData).length);
+            console.log('[PlaygamaSDK] 💾 Сохранение всех данных в один ключ:', gameDataKey);
             
             await this.saveToVKStorage(gameDataKey, mergedData);
             
-            // console.log('[PlaygamaSDK] ✅ Данные игрока сохранены в VK Cloud');
+            console.log('[PlaygamaSDK] ✅ Данные игрока сохранены в VK Cloud');
             return true;
             
         } catch (error) {
@@ -950,10 +953,10 @@ class PlaygamaSDKManager {
      * @returns {Promise<boolean>} - true if save successful
      */
     async saveData(data, flush = true) {
-        // console.log('[PlaygamaSDK] ========== SAVEDATA ВЫЗВАН ==========');
-        // console.log('[PlaygamaSDK] Платформа:', this.platform);
-        // console.log('[PlaygamaSDK] VK Bridge готов:', this.isVKBridgeReady());
-        // console.log('[PlaygamaSDK] Данные для сохранения:', Object.keys(data));
+        console.log('[PlaygamaSDK] ========== SAVEDATA ВЫЗВАН ==========');
+        console.log('[PlaygamaSDK] Платформа:', this.platform);
+        console.log('[PlaygamaSDK] VK Bridge готов:', this.isVKBridgeReady());
+        console.log('[PlaygamaSDK] Данные для сохранения, ключей:', Object.keys(data).length);
         
         // Validate input
         if (!data || typeof data !== 'object') {
@@ -966,26 +969,26 @@ class PlaygamaSDKManager {
         if (!localSaveSuccess) {
             console.warn('⚠️ Failed to backup to localStorage');
         } else {
-            // console.log('[PlaygamaSDK] ✅ Резервная копия в localStorage сохранена');
+            console.log('[PlaygamaSDK] ✅ Резервная копия в localStorage сохранена');
         }
         
         // VK Platform: Use VK Bridge Storage (priority over Playgama storage)
         if (this.platform === 'vk' && this.isVKBridgeReady()) {
-            // console.log('[PlaygamaSDK] 💾 Сохранение через VK Bridge Storage...');
+            console.log('[PlaygamaSDK] 💾 Сохранение через VK Bridge Storage...');
             
             try {
                 await this.savePlayerDataToVK(data);
-                // console.log('[PlaygamaSDK] ✅ Данные сохранены через VK Bridge');
-                // console.log('[PlaygamaSDK] ========== SAVEDATA ЗАВЕРШЕН (VK Bridge) ==========');
+                console.log('[PlaygamaSDK] ✅ Данные сохранены через VK Bridge');
+                console.log('[PlaygamaSDK] ========== SAVEDATA ЗАВЕРШЕН (VK Bridge) ==========');
                 return true;
             } catch (error) {
                 console.error('[PlaygamaSDK] ❌ Ошибка сохранения через VK Bridge:', error);
                 // Continue to Playgama storage fallback
             }
         } else {
-            // console.log('[PlaygamaSDK] ⚠️ VK Bridge НЕ используется. Причина:');
-            // console.log('[PlaygamaSDK]   - Платформа === "vk"?', this.platform === 'vk');
-            // console.log('[PlaygamaSDK]   - VK Bridge готов?', this.isVKBridgeReady());
+            console.log('[PlaygamaSDK] ⚠️ VK Bridge НЕ используется. Причина:');
+            console.log('[PlaygamaSDK]   - Платформа === "vk"?', this.platform === 'vk');
+            console.log('[PlaygamaSDK]   - VK Bridge готов?', this.isVKBridgeReady());
         }
         
         // If SDK not available or cloud saves not supported, use localStorage only (Requirement 3.3)
