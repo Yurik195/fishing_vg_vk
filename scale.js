@@ -7,6 +7,9 @@ class ScaleManager {
         this.baseWidth = config.BASE_WIDTH;
         this.baseHeight = config.BASE_HEIGHT;
         
+        // Получаем плотность пикселей устройства для High DPI дисплеев
+        this.dpr = window.devicePixelRatio || 1;
+        
         this.scale = 1;
         this.offsetX = 0;
         this.offsetY = 0;
@@ -29,6 +32,9 @@ class ScaleManager {
     }
     
     resize() {
+        // Обновляем DPR на случай изменения (например, перетаскивание между мониторами)
+        this.dpr = window.devicePixelRatio || 1;
+        
         // Используем visualViewport для iOS, который учитывает баннеры и другие наложенные элементы
         let windowWidth = window.innerWidth;
         let windowHeight = window.innerHeight;
@@ -52,13 +58,31 @@ class ScaleManager {
                 this.scale = Math.max(scaleX, scaleY);
                 break;
             case 'stretch':
-                this.canvas.width = windowWidth;
-                this.canvas.height = windowHeight;
+                // Устанавливаем физическое разрешение с учетом DPR
+                this.canvas.width = Math.floor(windowWidth * this.dpr);
+                this.canvas.height = Math.floor(windowHeight * this.dpr);
+                
+                // Масштабируем контекст обратно для работы в логических координатах
+                const ctxStretch = this.canvas.getContext('2d');
+                ctxStretch.scale(this.dpr, this.dpr);
+                
+                // CSS размеры остаются логическими
+                this.canvas.style.width = `${windowWidth}px`;
+                this.canvas.style.height = `${windowHeight}px`;
                 return;
         }
         
-        this.canvas.width = this.baseWidth;
-        this.canvas.height = this.baseHeight;
+        // Устанавливаем физическое разрешение canvas с учетом DPR для четкости
+        this.canvas.width = Math.floor(this.baseWidth * this.dpr);
+        this.canvas.height = Math.floor(this.baseHeight * this.dpr);
+        
+        // Масштабируем контекст для работы в логических координатах (весь код продолжает работать как раньше)
+        const ctx = this.canvas.getContext('2d');
+        ctx.scale(this.dpr, this.dpr);
+        
+        // Включаем качественное сглаживание
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
         
         const scaledWidth = this.baseWidth * this.scale;
         const scaledHeight = this.baseHeight * this.scale;
@@ -72,6 +96,7 @@ class ScaleManager {
             this.offsetY += window.visualViewport.offsetTop;
         }
         
+        // CSS размеры - логические пиксели (визуально все остается на тех же местах)
         this.canvas.style.width = `${scaledWidth}px`;
         this.canvas.style.height = `${scaledHeight}px`;
         this.canvas.style.position = 'absolute';

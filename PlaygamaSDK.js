@@ -563,24 +563,53 @@ class PlaygamaSDKManager {
         console.log('[PlaygamaSDK] 🔵 Инициализация VK Bridge...');
         
         try {
-            // Check if VK Bridge is available
-            if (typeof window.vkBridge === 'undefined') {
+            // Check if VK Bridge is available (может быть в разных местах)
+            let vkBridgeInstance = null;
+            
+            if (typeof window.vkBridge !== 'undefined') {
+                vkBridgeInstance = window.vkBridge;
+                console.log('[PlaygamaSDK] VK Bridge найден в window.vkBridge');
+            } else if (typeof window.VKBridge !== 'undefined') {
+                vkBridgeInstance = window.VKBridge;
+                console.log('[PlaygamaSDK] VK Bridge найден в window.VKBridge');
+            } else if (typeof vkBridge !== 'undefined') {
+                vkBridgeInstance = vkBridge;
+                console.log('[PlaygamaSDK] VK Bridge найден в глобальной области');
+            }
+            
+            if (!vkBridgeInstance) {
                 console.warn('[PlaygamaSDK] ⚠️ VK Bridge SDK не найден');
+                console.log('[PlaygamaSDK] Проверьте, что скрипт VK Bridge загружен в index.html');
                 return false;
             }
             
-            this.vkBridge = window.vkBridge;
+            this.vkBridge = vkBridgeInstance;
+            console.log('[PlaygamaSDK] VK Bridge объект:', this.vkBridge);
             
             // Initialize VK Bridge
-            await this.vkBridge.send('VKWebAppInit');
+            console.log('[PlaygamaSDK] Отправка VKWebAppInit...');
+            const initResult = await this.vkBridge.send('VKWebAppInit');
+            console.log('[PlaygamaSDK] VKWebAppInit результат:', initResult);
             
             this.isVKBridgeInitialized = true;
-            console.log('[PlaygamaSDK] ✅ VK Bridge инициализирован');
+            console.log('[PlaygamaSDK] ✅ VK Bridge инициализирован успешно');
+            
+            // Тестовая проверка Storage API
+            try {
+                console.log('[PlaygamaSDK] Тестовая проверка VK Storage API...');
+                const testResult = await this.vkBridge.send('VKWebAppStorageGet', {
+                    keys: ['_test_key']
+                });
+                console.log('[PlaygamaSDK] ✅ VK Storage API доступен:', testResult);
+            } catch (testError) {
+                console.warn('[PlaygamaSDK] ⚠️ VK Storage API может быть недоступен:', testError);
+            }
             
             return true;
             
         } catch (error) {
             console.error('[PlaygamaSDK] ❌ Ошибка инициализации VK Bridge:', error);
+            console.error('[PlaygamaSDK] Детали ошибки:', error.message, error.stack);
             this.isVKBridgeInitialized = false;
             return false;
         }
@@ -666,23 +695,28 @@ class PlaygamaSDKManager {
             // VK Storage requires string values
             const stringValue = typeof value === 'string' ? value : JSON.stringify(value);
             
-            await this.vkBridge.send('VKWebAppStorageSet', {
+            console.log(`[PlaygamaSDK] Отправка VKWebAppStorageSet для ключа: ${key}, длина: ${stringValue.length}`);
+            
+            const result = await this.vkBridge.send('VKWebAppStorageSet', {
                 key: key,
                 value: stringValue
             });
             
-            console.log(`[PlaygamaSDK] ✅ Данные сохранены в VK Storage: ${key}`);
+            console.log(`[PlaygamaSDK] ✅ Данные сохранены в VK Storage: ${key}, результат:`, result);
             
             // Also backup to localStorage
             localStorage.setItem(`vk_${key}`, stringValue);
+            console.log(`[PlaygamaSDK] ✅ Резервная копия в localStorage: vk_${key}`);
             
             return true;
             
         } catch (error) {
             console.error(`[PlaygamaSDK] ❌ Ошибка сохранения в VK Storage (${key}):`, error);
+            console.error(`[PlaygamaSDK] Детали ошибки:`, error.message, error.error_data);
             
             // Fallback to localStorage
             localStorage.setItem(`vk_${key}`, JSON.stringify(value));
+            console.log(`[PlaygamaSDK] ⚠️ Использован fallback в localStorage`);
             return false;
         }
     }
@@ -712,22 +746,30 @@ class PlaygamaSDKManager {
                 }
             });
             
+            console.log(`[PlaygamaSDK] Загружено из localStorage:`, Object.keys(result));
             return result;
         }
         
         try {
+            console.log(`[PlaygamaSDK] Отправка VKWebAppStorageGet для ключей:`, keyArray);
+            
             const response = await this.vkBridge.send('VKWebAppStorageGet', {
                 keys: keyArray
             });
+            
+            console.log(`[PlaygamaSDK] Ответ VKWebAppStorageGet:`, response);
             
             // Convert response to object
             const result = {};
             if (response.keys && Array.isArray(response.keys)) {
                 response.keys.forEach(item => {
+                    console.log(`[PlaygamaSDK] Обработка ключа: ${item.key}, значение: ${item.value ? item.value.substring(0, 100) : 'null'}`);
+                    
                     if (item.value) {
                         try {
                             result[item.key] = JSON.parse(item.value);
                         } catch (e) {
+                            console.warn(`[PlaygamaSDK] ⚠️ Не удалось распарсить JSON для ключа ${item.key}, используем как строку`);
                             result[item.key] = item.value;
                         }
                     }
@@ -740,6 +782,7 @@ class PlaygamaSDKManager {
             
         } catch (error) {
             console.error('[PlaygamaSDK] ❌ Ошибка загрузки из VK Storage:', error);
+            console.error('[PlaygamaSDK] Детали ошибки:', error.message, error.error_data);
             
             // Fallback to localStorage
             const result = {};
@@ -754,6 +797,7 @@ class PlaygamaSDKManager {
                 }
             });
             
+            console.log(`[PlaygamaSDK] ⚠️ Использован fallback в localStorage:`, Object.keys(result));
             return result;
         }
     }
