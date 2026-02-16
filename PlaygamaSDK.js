@@ -681,7 +681,9 @@ class PlaygamaSDKManager {
         }
         
         // VK Storage requires string values
-        const stringValue = typeof value === 'string' ? value : JSON.stringify(value);
+        // ИСПРАВЛЕНИЕ: Всегда делаем JSON.stringify, даже если value уже строка
+        // Это гарантирует корректное сохранение объектов
+        const stringValue = JSON.stringify(value);
         
         try {
             // console.log(`[PlaygamaSDK] Отправка VKWebAppStorageSet для ключа: ${key}, длина: ${stringValue.length}`);
