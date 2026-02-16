@@ -897,12 +897,24 @@ class PlaygamaSDKManager {
             
             const gameData = data[gameDataKey] || {};
             
-            console.log('[PlaygamaSDK] 🔍 gameData после извлечения:', gameData);
-            console.log('[PlaygamaSDK] 🔍 Тип gameData:', typeof gameData);
-            console.log('[PlaygamaSDK] ✅ Данные игрока загружены из VK Cloud');
-            console.log('[PlaygamaSDK] 📊 Количество полей:', Object.keys(gameData).length);
+            // ИСПРАВЛЕНИЕ: Если gameData - строка, парсим её
+            let parsedGameData = gameData;
+            if (typeof gameData === 'string') {
+                try {
+                    parsedGameData = JSON.parse(gameData);
+                    console.log('[PlaygamaSDK] ✅ JSON распарсен успешно');
+                } catch (e) {
+                    console.error('[PlaygamaSDK] ❌ Ошибка парсинга JSON:', e);
+                    parsedGameData = {};
+                }
+            }
             
-            return gameData;
+            console.log('[PlaygamaSDK] 🔍 gameData после извлечения:', typeof parsedGameData === 'object' ? 'Object' : parsedGameData);
+            console.log('[PlaygamaSDK] 🔍 Тип gameData:', typeof parsedGameData);
+            console.log('[PlaygamaSDK] ✅ Данные игрока загружены из VK Cloud');
+            console.log('[PlaygamaSDK] 📊 Количество полей:', Object.keys(parsedGameData).length);
+            
+            return parsedGameData;
             
         } catch (error) {
             console.error('[PlaygamaSDK] ❌ Ошибка загрузки данных игрока из VK Cloud:', error);
