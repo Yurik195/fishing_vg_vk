@@ -1,6 +1,6 @@
 const CONFIG = {
-    BASE_WIDTH: 1920,  // Увеличено с 1280 для лучшего качества
-    BASE_HEIGHT: 1080, // Увеличено с 720 для лучшего качества
+    BASE_WIDTH: 1280,
+    BASE_HEIGHT: 720,
     
     ORIENTATION: {
         MOBILE: 'landscape',

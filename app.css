@@ -46,14 +46,6 @@ canvas {
     -webkit-touch-callout: none;
     touch-action: none;
     cursor: default;
-    
-    /* Улучшение качества рендеринга для текста и изображений */
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    
-    /* Оптимизация рендеринга для canvas */
-    image-rendering: auto;
-    image-rendering: -webkit-optimize-contrast;
 }
 
 canvas.clickable {
