@@ -712,7 +712,8 @@ class PlaygamaSDKManager {
             
         } catch (error) {
             console.error(`[PlaygamaSDK] ❌ Ошибка сохранения в VK Storage (${key}):`, error);
-            console.error(`[PlaygamaSDK] Детали ошибки:`, error.message, error.error_data);
+            console.error(`[PlaygamaSDK] Детали ошибки:`, error.message, error.error_data, error.error_type, error.error_code);
+            console.error(`[PlaygamaSDK] Размер данных:`, stringValue?.length || 0, 'символов');
             
             // Fallback to localStorage
             localStorage.setItem(`vk_${key}`, JSON.stringify(value));
