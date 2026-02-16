@@ -723,7 +723,7 @@ class PlaygamaSDKManager {
      */
     async loadFromVKStorage(keys) {
         const keyArray = Array.isArray(keys) ? keys : [keys];
-        // console.log(`[PlaygamaSDK] 📥 Загрузка из VK Storage:`, keyArray);
+        console.log(`[PlaygamaSDK] 📥 Загрузка из VK Storage:`, keyArray);
         
         if (!this.isVKBridgeReady()) {
             console.warn('[PlaygamaSDK] ⚠️ VK Bridge не готов, используем localStorage');
@@ -752,36 +752,39 @@ class PlaygamaSDKManager {
                 }
             });
             
-            // console.log(`[PlaygamaSDK] Загружено из localStorage:`, Object.keys(result));
+            console.log(`[PlaygamaSDK] Загружено из localStorage:`, Object.keys(result));
             return result;
         }
         
         try {
-            // console.log(`[PlaygamaSDK] Отправка VKWebAppStorageGet для ключей:`, keyArray);
+            console.log(`[PlaygamaSDK] Отправка VKWebAppStorageGet для ключей:`, keyArray);
             
             const response = await this.vkBridge.send('VKWebAppStorageGet', {
                 keys: keyArray
             });
             
-            // console.log(`[PlaygamaSDK] Ответ VKWebAppStorageGet:`, response);
+            console.log(`[PlaygamaSDK] Ответ VKWebAppStorageGet:`, response);
             
             // Convert response to object
             const result = {};
             if (response.keys && Array.isArray(response.keys)) {
                 response.keys.forEach(item => {
-                    // console.log(`[PlaygamaSDK] Обработка ключа: ${item.key}, значение: ${item.value ? item.value.substring(0, 100) : 'null'}`);
+                    console.log(`[PlaygamaSDK] Обработка ключа: ${item.key}, значение длиной: ${item.value ? item.value.length : 0}`);
                     
                     if (item.value) {
                         try {
                             // Первая попытка парсинга
                             let parsed = JSON.parse(item.value);
                             
+                            console.log(`[PlaygamaSDK] 🔍 После первого парсинга, тип:`, typeof parsed);
+                            console.log(`[PlaygamaSDK] 🔍 Количество ключей:`, typeof parsed === 'object' ? Object.keys(parsed).length : 'N/A');
+                            
                             // ИСПРАВЛЕНИЕ: Если результат - строка, пробуем распарсить еще раз
                             // (на случай двойного stringify из старых сохранений)
                             if (typeof parsed === 'string') {
                                 try {
                                     parsed = JSON.parse(parsed);
-                                    // console.log(`[PlaygamaSDK] ✅ Исправлен двойной stringify для ключа ${item.key}`);
+                                    console.log(`[PlaygamaSDK] ✅ Исправлен двойной stringify для ключа ${item.key}`);
                                 } catch (e) {
                                     // Если второй парсинг не удался, оставляем строку
                                 }
@@ -789,14 +792,14 @@ class PlaygamaSDKManager {
                             
                             result[item.key] = parsed;
                         } catch (e) {
-                            // console.warn(`[PlaygamaSDK] ⚠️ Не удалось распарсить JSON для ключа ${item.key}, используем как строку`);
+                            console.warn(`[PlaygamaSDK] ⚠️ Не удалось распарсить JSON для ключа ${item.key}, используем как строку`);
                             result[item.key] = item.value;
                         }
                     }
                 });
             }
             
-            // console.log(`[PlaygamaSDK] ✅ Данные загружены из VK Storage:`, Object.keys(result));
+            console.log(`[PlaygamaSDK] ✅ Данные загружены из VK Storage:`, Object.keys(result));
             
             return result;
             
@@ -875,7 +878,7 @@ class PlaygamaSDKManager {
      * @returns {Promise<Object>} - Player data object
      */
     async loadPlayerDataFromVK() {
-        // console.log('[PlaygamaSDK] 📥 Загрузка данных игрока из VK Cloud...');
+        console.log('[PlaygamaSDK] 📥 Загрузка данных игрока из VK Cloud...');
         
         if (!this.isVKBridgeReady()) {
             console.warn('[PlaygamaSDK] ⚠️ VK Bridge не готов');
@@ -888,10 +891,16 @@ class PlaygamaSDKManager {
             
             const data = await this.loadFromVKStorage([gameDataKey]);
             
+            console.log('[PlaygamaSDK] 🔍 Данные из loadFromVKStorage:', data);
+            console.log('[PlaygamaSDK] 🔍 Тип данных:', typeof data);
+            console.log('[PlaygamaSDK] 🔍 Ключи данных:', Object.keys(data));
+            
             const gameData = data[gameDataKey] || {};
             
-            // console.log('[PlaygamaSDK] ✅ Данные игрока загружены из VK Cloud');
-            // console.log('[PlaygamaSDK] 📊 Количество полей:', Object.keys(gameData).length);
+            console.log('[PlaygamaSDK] 🔍 gameData после извлечения:', gameData);
+            console.log('[PlaygamaSDK] 🔍 Тип gameData:', typeof gameData);
+            console.log('[PlaygamaSDK] ✅ Данные игрока загружены из VK Cloud');
+            console.log('[PlaygamaSDK] 📊 Количество полей:', Object.keys(gameData).length);
             
             return gameData;
             
