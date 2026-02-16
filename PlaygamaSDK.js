@@ -804,7 +804,7 @@ class PlaygamaSDKManager {
     
     /**
      * Save complete player data to VK Cloud Storage
-     * Loads current data first, then updates specified fields
+     * Saves all data as a single JSON string to avoid flood control
      * @param {Object} updates - Object with fields to update
      * @returns {Promise<boolean>} - true if save successful
      */
@@ -817,18 +817,23 @@ class PlaygamaSDKManager {
         }
         
         try {
+            // ИСПРАВЛЕНИЕ: Сохраняем все данные в ОДИН ключ вместо множества отдельных
+            // Это избегает flood control от VK (error_code: 9)
+            
+            const gameDataKey = 'fishingGameData';
+            
             // Load current data first
-            const currentData = await this.loadPlayerDataFromVK();
+            const currentDataResult = await this.loadFromVKStorage([gameDataKey]);
+            const currentData = currentDataResult[gameDataKey] || {};
             
             // Merge with updates
             const mergedData = { ...currentData, ...updates };
             
-            // Save each field separately
-            const savePromises = Object.entries(mergedData).map(([key, value]) => 
-                this.saveToVKStorage(key, value)
-            );
+            // Save as single key
+            console.log('[PlaygamaSDK] 💾 Сохранение всех данных в один ключ:', gameDataKey);
+            console.log('[PlaygamaSDK] 💾 Количество полей:', Object.keys(mergedData).length);
             
-            await Promise.all(savePromises);
+            await this.saveToVKStorage(gameDataKey, mergedData);
             
             console.log('[PlaygamaSDK] ✅ Данные игрока сохранены в VK Cloud');
             return true;
@@ -841,6 +846,7 @@ class PlaygamaSDKManager {
     
     /**
      * Load complete player data from VK Cloud Storage
+     * Loads all data from a single JSON string
      * @returns {Promise<Object>} - Player data object
      */
     async loadPlayerDataFromVK() {
@@ -852,26 +858,17 @@ class PlaygamaSDKManager {
         }
         
         try {
-            // Define all keys we want to load
-            const keys = [
-                'coins',
-                'premiumCoins',
-                'level',
-                'experience',
-                'inventory',
-                'gear',
-                'unlockedLocations',
-                'completedQuests',
-                'adRewards',
-                'settings',
-                'lastSaveTime',
-                'totalPlayTime'
-            ];
+            // ИСПРАВЛЕНИЕ: Загружаем все данные из ОДНОГО ключа
+            const gameDataKey = 'fishingGameData';
             
-            const data = await this.loadFromVKStorage(keys);
+            const data = await this.loadFromVKStorage([gameDataKey]);
+            
+            const gameData = data[gameDataKey] || {};
             
             console.log('[PlaygamaSDK] ✅ Данные игрока загружены из VK Cloud');
-            return data;
+            console.log('[PlaygamaSDK] 📊 Количество полей:', Object.keys(gameData).length);
+            
+            return gameData;
             
         } catch (error) {
             console.error('[PlaygamaSDK] ❌ Ошибка загрузки данных игрока из VK Cloud:', error);
