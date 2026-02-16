@@ -2360,3 +2360,32 @@ window.playgamaSDK = new PlaygamaSDKManager();
 
 // console.log('[PlaygamaSDK] Global instance created:', window.playgamaSDK);
 // console.log('[PlaygamaSDK] Ready for initialization');
+
+
+// Добавляем функцию для очистки VK Storage (для отладки)
+window.clearVKStorage = async function() {
+    console.log('=== ОЧИСТКА VK STORAGE ===');
+    console.warn('⚠️ ВНИМАНИЕ: Это удалит ВСЕ данные из VK Cloud Storage!');
+    
+    if (!window.playgamaSDK || !window.playgamaSDK.vkBridge) {
+        console.error('❌ VK Bridge не найден');
+        return;
+    }
+    
+    try {
+        console.log('🗑️ Удаление ключа: fishingGameData');
+        
+        await window.playgamaSDK.vkBridge.send('VKWebAppStorageSet', {
+            key: 'fishingGameData',
+            value: ''
+        });
+        
+        console.log('✅ VK Storage очищен');
+        console.log('💡 Обновите страницу для загрузки данных из localStorage');
+        
+    } catch (error) {
+        console.error('❌ Ошибка очистки VK Storage:', error);
+    }
+};
+
+console.log('💡 Функция clearVKStorage() доступна в консоли');
