@@ -672,7 +672,7 @@ class PlaygamaSDKManager {
      * @returns {Promise<boolean>} - true if save successful
      */
     async saveToVKStorage(key, value) {
-        // console.log(`[PlaygamaSDK] 💾 Сохранение в VK Storage: ${key}`);
+        console.log(`[PlaygamaSDK] 💾 Сохранение в VK Storage: ${key}`);
         
         if (!this.isVKBridgeReady()) {
             console.warn('[PlaygamaSDK] ⚠️ VK Bridge не готов, используем localStorage');
@@ -686,18 +686,18 @@ class PlaygamaSDKManager {
         const stringValue = JSON.stringify(value);
         
         try {
-            // console.log(`[PlaygamaSDK] Отправка VKWebAppStorageSet для ключа: ${key}, длина: ${stringValue.length}`);
+            console.log(`[PlaygamaSDK] Отправка VKWebAppStorageSet для ключа: ${key}, длина: ${stringValue.length}`);
             
             const result = await this.vkBridge.send('VKWebAppStorageSet', {
                 key: key,
                 value: stringValue
             });
             
-            // console.log(`[PlaygamaSDK] ✅ Данные сохранены в VK Storage: ${key}, результат:`, result);
+            console.log(`[PlaygamaSDK] ✅ Данные сохранены в VK Storage: ${key}, результат:`, result);
             
             // Also backup to localStorage
             localStorage.setItem(`vk_${key}`, stringValue);
-            // console.log(`[PlaygamaSDK] ✅ Резервная копия в localStorage: vk_${key}`);
+            console.log(`[PlaygamaSDK] ✅ Резервная копия в localStorage: vk_${key}`);
             
             return true;
             
