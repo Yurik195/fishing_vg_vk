@@ -610,9 +610,19 @@ class Game {
                 this.fishingGame.unlockedZones = data.unlockedZones;
             }
             
-            // Восстанавливаем садок
+            // Восстанавливаем садок - ОПТИМИЗИРОВАНО: восстанавливаем полные объекты рыб
             if (data.storedFish && Array.isArray(data.storedFish)) {
-                this.fishingGame.storedFish = data.storedFish;
+                // Если данные в старом формате (полные объекты)
+                if (data.storedFish.length > 0 && data.storedFish[0].weight !== undefined) {
+                    this.fishingGame.storedFish = data.storedFish;
+                }
+                // Если данные в новом формате (сокращенные: {id, w})
+                else if (data.storedFish.length > 0 && data.storedFish[0].w !== undefined) {
+                    this.fishingGame.storedFish = data.storedFish.map(f => ({
+                        id: f.id,
+                        weight: f.w
+                    }));
+                }
             }
             
             // Восстанавливаем улучшения садка
@@ -623,19 +633,54 @@ class Game {
                 this.fishingGame.keepnetUpgradeLevel = data.keepnetUpgradeLevel;
             }
             
-            // Восстанавливаем инвентарь снастей (с прочностью)
+            // Восстанавливаем инвентарь снастей - ОПТИМИЗИРОВАНО
             if (data.gearInventory) {
                 if (data.gearInventory.inventory) {
-                    this.fishingGame.gearInventory.inventory = data.gearInventory.inventory;
+                    // Если данные в новом формате (сокращенные: {id, d, q})
+                    if (data.gearInventory.inventory.length > 0 && data.gearInventory.inventory[0].d !== undefined) {
+                        this.fishingGame.gearInventory.inventory = data.gearInventory.inventory.map(item => {
+                            // Получаем полные данные предмета из базы
+                            const fullItem = this.fishingGame.gearInventory.getItemById(item.id);
+                            return {
+                                ...fullItem,
+                                durability: item.d,
+                                quantity: item.q
+                            };
+                        });
+                    }
+                    // Если данные в старом формате (полные объекты)
+                    else {
+                        this.fishingGame.gearInventory.inventory = data.gearInventory.inventory;
+                    }
                 }
                 if (data.gearInventory.equipped) {
-                    this.fishingGame.gearInventory.equipped = data.gearInventory.equipped;
+                    // Восстанавливаем экипированные предметы по ID
+                    const equipped = {};
+                    for (const [slot, itemId] of Object.entries(data.gearInventory.equipped)) {
+                        if (itemId) {
+                            equipped[slot] = this.fishingGame.gearInventory.getItemById(itemId);
+                        } else {
+                            equipped[slot] = null;
+                        }
+                    }
+                    this.fishingGame.gearInventory.equipped = equipped;
                 }
                 console.log('✅ Инвентарь снастей восстановлен из облака');
             }
             
-            // Восстанавливаем коллекцию
+            // Восстанавливаем коллекцию - ОПТИМИЗИРОВАНО
             if (data.collection) {
+                // Новый формат (сокращенные ключи: fish, monsters, items)
+                if (data.collection.fish) {
+                    this.collectionSystem.caughtFish = new Set(data.collection.fish);
+                }
+                if (data.collection.monsters) {
+                    this.collectionSystem.caughtMonsters = new Set(data.collection.monsters);
+                }
+                if (data.collection.items) {
+                    this.collectionSystem.caughtItems = new Set(data.collection.items);
+                }
+                // Старый формат (полные ключи)
                 if (data.collection.caughtFish) {
                     this.collectionSystem.caughtFish = new Set(data.collection.caughtFish);
                 }
@@ -650,13 +695,32 @@ class Game {
             
             // Восстанавливаем квесты - ОПТИМИЗИРОВАНО
             if (data.quests && window.questSystem) {
-                // Восстанавливаем даты сброса и завершенные квесты
+                // Новый формат (сокращенные ключи)
+                if (data.quests.lastDaily) window.questSystem.lastDailyReset = data.quests.lastDaily;
+                if (data.quests.lastWeekly) window.questSystem.lastWeeklyReset = data.quests.lastWeekly;
+                if (data.quests.compDaily) window.questSystem.completedDaily = new Set(data.quests.compDaily);
+                if (data.quests.compWeekly) window.questSystem.completedWeekly = new Set(data.quests.compWeekly);
+                
+                // Восстанавливаем прогресс квестов (новый формат: {i, c})
+                if (data.quests.daily && window.questSystem.dailyQuests) {
+                    data.quests.daily.forEach(progress => {
+                        const quest = window.questSystem.dailyQuests.find(q => q.id === progress.i);
+                        if (quest) quest.currentAmount = progress.c;
+                    });
+                }
+                if (data.quests.weekly && window.questSystem.weeklyQuests) {
+                    data.quests.weekly.forEach(progress => {
+                        const quest = window.questSystem.weeklyQuests.find(q => q.id === progress.i);
+                        if (quest) quest.currentAmount = progress.c;
+                    });
+                }
+                
+                // Старый формат (полные ключи)
                 if (data.quests.lastDailyReset) window.questSystem.lastDailyReset = data.quests.lastDailyReset;
                 if (data.quests.lastWeeklyReset) window.questSystem.lastWeeklyReset = data.quests.lastWeeklyReset;
                 if (data.quests.completedDaily) window.questSystem.completedDaily = new Set(data.quests.completedDaily);
                 if (data.quests.completedWeekly) window.questSystem.completedWeekly = new Set(data.quests.completedWeekly);
                 
-                // Восстанавливаем прогресс квестов (если квесты уже сгенерированы)
                 if (data.quests.dailyProgress && window.questSystem.dailyQuests) {
                     data.quests.dailyProgress.forEach(progress => {
                         const quest = window.questSystem.dailyQuests.find(q => q.id === progress.id);
@@ -675,9 +739,20 @@ class Game {
             
             // Восстанавливаем трофеи - ОПТИМИЗИРОВАНО
             if (data.trophies && this.trophySystem) {
-                // Восстанавливаем трофеи по ID (полные данные есть в системе)
+                // Новый формат (сокращенные ключи: ids, inst, slots)
+                if (data.trophies.ids) {
+                    this.trophySystem.trophies = data.trophies.ids.map(id => 
+                        this.trophySystem.trophies.find(t => t.id === id)
+                    ).filter(Boolean);
+                }
+                if (data.trophies.slots) {
+                    this.trophySystem.slots.forEach(slot => {
+                        slot.unlocked = data.trophies.slots.includes(slot.id);
+                    });
+                }
+                
+                // Старый формат (полные ключи)
                 if (data.trophies.trophyIds) {
-                    // Трофеи восстановятся из базы данных по ID
                     this.trophySystem.trophies = data.trophies.trophyIds.map(id => 
                         this.trophySystem.trophies.find(t => t.id === id)
                     ).filter(Boolean);
@@ -692,7 +767,13 @@ class Game {
             
             // Восстанавливаем профиль - ОПТИМИЗИРОВАНО
             if (data.profile && this.profileSystem) {
-                // Восстанавливаем только критичные поля
+                // Новый формат (сокращенные ключи: l, x, f, h)
+                if (data.profile.l !== undefined) this.profileSystem.stats.level = data.profile.l;
+                if (data.profile.x !== undefined) this.profileSystem.stats.xp = data.profile.x;
+                if (data.profile.f !== undefined) this.profileSystem.stats.totalFishCaught = data.profile.f;
+                if (data.profile.h) this.profileSystem.stats.heaviestFish = data.profile.h;
+                
+                // Старый формат (полные ключи)
                 if (data.profile.level !== undefined) this.profileSystem.stats.level = data.profile.level;
                 if (data.profile.xp !== undefined) this.profileSystem.stats.xp = data.profile.xp;
                 if (data.profile.totalFishCaught !== undefined) this.profileSystem.stats.totalFishCaught = data.profile.totalFishCaught;
@@ -705,6 +786,14 @@ class Game {
             
             // Восстанавливаем ежедневные награды
             if (data.dailyRewards && window.dailyRewardsSystem) {
+                // Новый формат (сокращенные ключи: last, day, total)
+                if (data.dailyRewards.last) {
+                    window.dailyRewardsSystem.lastClaimDate = new Date(data.dailyRewards.last);
+                }
+                if (data.dailyRewards.day !== undefined) window.dailyRewardsSystem.currentDay = data.dailyRewards.day;
+                if (data.dailyRewards.total !== undefined) window.dailyRewardsSystem.totalDaysClaimed = data.dailyRewards.total;
+                
+                // Старый формат (полные ключи)
                 if (data.dailyRewards.lastClaimDate) {
                     window.dailyRewardsSystem.lastClaimDate = new Date(data.dailyRewards.lastClaimDate);
                 }
@@ -721,6 +810,14 @@ class Game {
             
             // Восстанавливаем туториал
             if (data.tutorial && window.tutorialSystem) {
+                // Новый формат (сокращенные ключи: done, fish, step, first, ui)
+                if (data.tutorial.done !== undefined) window.tutorialSystem.tutorialCompleted = data.tutorial.done;
+                if (data.tutorial.fish !== undefined) window.tutorialSystem.tutorialFishCount = data.tutorial.fish;
+                if (data.tutorial.step !== undefined) window.tutorialSystem.currentStep = data.tutorial.step;
+                if (data.tutorial.first !== undefined) window.tutorialSystem.firstFishingSession = data.tutorial.first;
+                if (data.tutorial.ui !== undefined) window.tutorialSystem.uiTutorialShown = data.tutorial.ui;
+                
+                // Старый формат (полные ключи)
                 if (data.tutorial.tutorialCompleted !== undefined) window.tutorialSystem.tutorialCompleted = data.tutorial.tutorialCompleted;
                 if (data.tutorial.tutorialFishCount !== undefined) window.tutorialSystem.tutorialFishCount = data.tutorial.tutorialFishCount;
                 if (data.tutorial.currentStep !== undefined) window.tutorialSystem.currentStep = data.tutorial.currentStep;
@@ -855,64 +952,77 @@ class Game {
             console.log('💾 SDK инициализирован:', this.sdkInitialized);
             console.log('💾 Player готов:', window.playgamaSDK?.isPlayerReady);
             
+            // ОПТИМИЗАЦИЯ: Сохраняем только критичные данные для уменьшения размера
             const data = {
+                // Валюта
                 coins: this.fishingGame.coins,
                 premiumCoins: this.fishingGame.premiumCoins,
+                
+                // Прогресс
                 xp: this.fishingGame.progression?.currentXP || 0,
                 level: this.fishingGame.progression?.level || 1,
+                
+                // Локации
                 currentZone: this.fishingGame.currentZone,
                 unlockedZones: this.fishingGame.unlockedZones || [1],
-                storedFish: this.fishingGame.storedFish || [],
+                
+                // Садок - ОПТИМИЗИРОВАНО: только ID рыб и их вес
+                storedFish: (this.fishingGame.storedFish || []).map(f => ({id: f.id, w: f.weight})),
                 keepnetCapacity: this.fishingGame.keepnetCapacity || 10,
                 keepnetUpgradeLevel: this.fishingGame.keepnetUpgradeLevel || 0,
                 
-                // Инвентарь снастей (с прочностью)
+                // Инвентарь снастей - ОПТИМИЗИРОВАНО: только ID и прочность
                 gearInventory: {
-                    inventory: this.fishingGame.gearInventory.inventory,
-                    equipped: this.fishingGame.gearInventory.equipped
+                    inventory: this.fishingGame.gearInventory.inventory.map(item => ({
+                        id: item.id,
+                        d: item.durability,
+                        q: item.quantity
+                    })),
+                    equipped: {
+                        rod: this.fishingGame.gearInventory.equipped.rod?.id || null,
+                        reel: this.fishingGame.gearInventory.equipped.reel?.id || null,
+                        line: this.fishingGame.gearInventory.equipped.line?.id || null,
+                        bait: this.fishingGame.gearInventory.equipped.bait?.id || null
+                    }
                 },
                 
-                // Коллекция
+                // Коллекция - только ID
                 collection: {
-                    caughtFish: Array.from(this.collectionSystem.caughtFish),
-                    caughtMonsters: Array.from(this.collectionSystem.caughtMonsters),
-                    caughtItems: Array.from(this.collectionSystem.caughtItems)
+                    fish: Array.from(this.collectionSystem.caughtFish),
+                    monsters: Array.from(this.collectionSystem.caughtMonsters),
+                    items: Array.from(this.collectionSystem.caughtItems)
                 },
                 
-                // Квесты - ОПТИМИЗИРОВАНО: сохраняем только прогресс
+                // Квесты - только прогресс
                 quests: window.questSystem ? {
-                    lastDailyReset: window.questSystem.lastDailyReset,
-                    lastWeeklyReset: window.questSystem.lastWeeklyReset,
-                    completedDaily: Array.from(window.questSystem.completedDaily),
-                    completedWeekly: Array.from(window.questSystem.completedWeekly),
-                    // Сохраняем только прогресс квестов (currentAmount), остальное генерируется заново
-                    dailyProgress: window.questSystem.dailyQuests.map(q => ({id: q.id, current: q.currentAmount})),
-                    weeklyProgress: window.questSystem.weeklyQuests.map(q => ({id: q.id, current: q.currentAmount}))
+                    lastDaily: window.questSystem.lastDailyReset,
+                    lastWeekly: window.questSystem.lastWeeklyReset,
+                    compDaily: Array.from(window.questSystem.completedDaily),
+                    compWeekly: Array.from(window.questSystem.completedWeekly),
+                    daily: window.questSystem.dailyQuests.map(q => ({i: q.id, c: q.currentAmount})),
+                    weekly: window.questSystem.weeklyQuests.map(q => ({i: q.id, c: q.currentAmount}))
                 } : null,
                 
-                // Трофеи - ОПТИМИЗИРОВАНО: сохраняем только ID
+                // Трофеи - только ID
                 trophies: this.trophySystem ? {
-                    trophyIds: this.trophySystem.trophies.map(t => t.id),
-                    installedTrophyIds: Object.values(this.trophySystem.installedTrophies).map(t => t?.id).filter(Boolean),
-                    unlockedSlots: this.trophySystem.slots.filter(s => s.unlocked).map(s => s.id)
+                    ids: this.trophySystem.trophies.map(t => t.id),
+                    inst: Object.values(this.trophySystem.installedTrophies).map(t => t?.id).filter(Boolean),
+                    slots: this.trophySystem.slots.filter(s => s.unlocked).map(s => s.id)
                 } : null,
                 
-                // Профиль - ОПТИМИЗИРОВАНО: только критичные поля
+                // Профиль - минимум
                 profile: this.profileSystem ? {
-                    level: this.profileSystem.stats.level,
-                    xp: this.profileSystem.stats.xp,
-                    totalFishCaught: this.profileSystem.stats.totalFishCaught,
-                    heaviestFish: this.profileSystem.stats.heaviestFish
+                    l: this.profileSystem.stats.level,
+                    x: this.profileSystem.stats.xp,
+                    f: this.profileSystem.stats.totalFishCaught,
+                    h: this.profileSystem.stats.heaviestFish
                 } : null,
-                
-                // Рынок - НЕ СОХРАНЯЕМ: генерируется заново каждый час
-                // market: null,
                 
                 // Ежедневные награды
                 dailyRewards: window.dailyRewardsSystem ? {
-                    lastClaimDate: window.dailyRewardsSystem.lastClaimDate ? window.dailyRewardsSystem.lastClaimDate.toISOString() : null,
-                    currentDay: window.dailyRewardsSystem.currentDay,
-                    totalDaysClaimed: window.dailyRewardsSystem.totalDaysClaimed
+                    last: window.dailyRewardsSystem.lastClaimDate ? window.dailyRewardsSystem.lastClaimDate.toISOString() : null,
+                    day: window.dailyRewardsSystem.currentDay,
+                    total: window.dailyRewardsSystem.totalDaysClaimed
                 } : null,
                 
                 // День/ночь
@@ -920,11 +1030,11 @@ class Game {
                 
                 // Туториал
                 tutorial: window.tutorialSystem ? {
-                    tutorialCompleted: window.tutorialSystem.tutorialCompleted,
-                    tutorialFishCount: window.tutorialSystem.tutorialFishCount,
-                    currentStep: window.tutorialSystem.currentStep,
-                    firstFishingSession: window.tutorialSystem.firstFishingSession,
-                    uiTutorialShown: window.tutorialSystem.uiTutorialShown
+                    done: window.tutorialSystem.tutorialCompleted,
+                    fish: window.tutorialSystem.tutorialFishCount,
+                    step: window.tutorialSystem.currentStep,
+                    first: window.tutorialSystem.firstFishingSession,
+                    ui: window.tutorialSystem.uiTutorialShown
                 } : null,
                 
                 // Рекламные награды
@@ -939,8 +1049,17 @@ class Game {
                 xp: data.xp,
                 currentZone: data.currentZone,
                 unlockedZones: data.unlockedZones,
-                tutorialCompleted: data.tutorial?.tutorialCompleted
+                tutorialCompleted: data.tutorial?.done || data.tutorial?.tutorialCompleted
             });
+            
+            // Проверяем размер данных
+            const dataSize = JSON.stringify(data).length;
+            console.log('📊 Размер данных для сохранения:', dataSize, 'символов');
+            if (dataSize > 4000) {
+                console.error('❌ КРИТИЧЕСКАЯ ОШИБКА: Размер данных превышает лимит VK Storage (4000)!');
+            } else if (dataSize > 3500) {
+                console.warn('⚠️ ВНИМАНИЕ: Размер данных близок к лимиту VK Storage');
+            }
             
             console.log('📊 Все ключи данных:', Object.keys(data));
             

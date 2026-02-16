@@ -688,6 +688,17 @@ class PlaygamaSDKManager {
         // Это гарантирует корректное сохранение объектов
         const stringValue = JSON.stringify(value);
         
+        // Проверяем размер данных (VK лимит: 4000 символов)
+        if (stringValue.length > 4000) {
+            console.error(`[PlaygamaSDK] ❌ ОШИБКА: Размер данных ${stringValue.length} символов превышает лимит VK Storage (4000)!`);
+            console.error(`[PlaygamaSDK] Данные НЕ будут сохранены в облако. Требуется дополнительная оптимизация.`);
+            return false;
+        } else if (stringValue.length > 3500) {
+            console.warn(`[PlaygamaSDK] ⚠️ ВНИМАНИЕ: Размер данных ${stringValue.length} символов близок к лимиту VK Storage (4000)`);
+        } else {
+            console.log(`[PlaygamaSDK] ✅ Размер данных ${stringValue.length} символов в пределах лимита VK Storage`);
+        }
+        
         try {
             console.log(`[PlaygamaSDK] Отправка VKWebAppStorageSet для ключа: ${key}, длина: ${stringValue.length}`);
             
