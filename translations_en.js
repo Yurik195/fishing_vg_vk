@@ -452,7 +452,9 @@ EN_TRANSLATIONS['rating_antirating'] = 'Anti-rating';
 EN_TRANSLATIONS['loading'] = 'Loading...';
 EN_TRANSLATIONS['loading_rating'] = 'Loading rating...';
 EN_TRANSLATIONS['you'] = 'You';
+EN_TRANSLATIONS['ui_you'] = 'You'; // Для использования через L('you', 'Вы')
 EN_TRANSLATIONS['player'] = 'Player';
+EN_TRANSLATIONS['ui_player'] = 'Player'; // Для использования через L('player', 'Игрок')
 EN_TRANSLATIONS['not_authorized'] = 'Not authorized';
 EN_TRANSLATIONS['your_position'] = 'Your position:';
 EN_TRANSLATIONS['top_by_level'] = 'Top players by level';
@@ -673,6 +675,12 @@ EN_TRANSLATIONS['bait_20_targets'] = 'chub/ide/asp';
 EN_TRANSLATIONS['bait_21_name'] = 'Locust';
 EN_TRANSLATIONS['bait_21_type'] = 'Animal';
 EN_TRANSLATIONS['bait_21_targets'] = 'asp/chub/trout';
+
+// Time abbreviations (for quests and profile)
+EN_TRANSLATIONS['time_hours_short'] = 'h';
+EN_TRANSLATIONS['time_minutes_short'] = 'm';
+EN_TRANSLATIONS['time_days_short'] = 'd';
+EN_TRANSLATIONS['ui_minutes_word'] = 'min';
 
 // Export for use in LocalizationSystem
 if (typeof module !== 'undefined' && module.exports) {
@@ -1473,12 +1481,13 @@ EN_TRANSLATIONS['shop_breaking_load'] = 'Breaking Load';
 EN_TRANSLATIONS['shop_price'] = 'Price:';
 EN_TRANSLATIONS['shop_unlock'] = 'Unlock:';
 EN_TRANSLATIONS['shop_unlock_level'] = 'Unlock: Level';
-EN_TRANSLATIONS['shop_type_bundle'] = 'Type: Bundle';
-EN_TRANSLATIONS['shop_type_gear_bundle'] = 'Type: Gear Bundle';
-EN_TRANSLATIONS['shop_type_ad_reward'] = 'Type: Ad Reward';
-EN_TRANSLATIONS['shop_type_premium_coins'] = 'Type: Fishing Marks';
-EN_TRANSLATIONS['shop_type_exchange'] = 'Type: Currency Exchange';
+EN_TRANSLATIONS['shop_type_bundle'] = 'Bundle';
+EN_TRANSLATIONS['shop_type_gear_bundle'] = 'Gear Bundle';
+EN_TRANSLATIONS['shop_type_ad_reward'] = 'Ad Reward';
+EN_TRANSLATIONS['shop_type_premium_coins'] = 'Fishing Marks';
+EN_TRANSLATIONS['shop_type_exchange'] = 'Currency Exchange';
 EN_TRANSLATIONS['shop_regular_coins'] = '{amount} regular coins';
+EN_TRANSLATIONS['shop_premium_coins'] = '{amount} fishing marks';
 EN_TRANSLATIONS['shop_fishing_marks_amount'] = '{amount} marks';
 EN_TRANSLATIONS['shop_exchange'] = 'Exchange';
 EN_TRANSLATIONS['shop_regular_price'] = 'Regular price:';
@@ -1586,6 +1595,7 @@ EN_TRANSLATIONS['ui_you_get'] = 'You get';
 EN_TRANSLATIONS['ui_you_pay'] = 'You pay';
 EN_TRANSLATIONS['ui_watch_ad'] = 'Watch\nAd';
 EN_TRANSLATIONS['ui_progress'] = 'Progress';
+EN_TRANSLATIONS['ui_cooldown'] = 'Available in';
 
 // Shop bundle contents
 EN_TRANSLATIONS['shop_contents'] = 'Contents:';
@@ -1920,8 +1930,7 @@ EN_TRANSLATIONS['leaderboard_auth_required'] = 'Log in to view the leaderboard';
 EN_TRANSLATIONS['leaderboard_auth_hint'] = 'Leaderboard is only available to authorized players';
 EN_TRANSLATIONS['leaderboard_empty'] = 'Leaderboard is empty';
 EN_TRANSLATIONS['leaderboard_empty_hint'] = 'Play and become the first on the list!';
-EN_TRANSLATIONS['you'] = 'You';
-EN_TRANSLATIONS['player'] = 'Player';
+// Дубликаты удалены - используются ключи выше с ui_ префиксом
 
 EN_TRANSLATIONS['hook_size'] = 'Size';
 
@@ -2283,4 +2292,5 @@ EN_TRANSLATIONS['iap_gear_bundle_master_desc'] = 'Legendary set of top premium g
 // Currency exchange
 EN_TRANSLATIONS['iap_currency_exchange_name'] = 'Currency Exchange';
 EN_TRANSLATIONS['iap_currency_exchange_desc'] = 'Exchange fishing marks for regular coins. Rate: 1 = 12';
+
 

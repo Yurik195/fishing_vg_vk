@@ -349,7 +349,7 @@ function syncIAPPricesWithSDK() {
             // Update price data from SDK
             item.price = productInfo.priceValue || item.price;
             item.priceValue = productInfo.priceValue;
-            item.priceCurrencyCode = productInfo.priceCurrencyCode || 'YAN';
+            item.priceCurrencyCode = productInfo.priceCurrencyCode || '';
             item.priceFormatted = productInfo.price; // Formatted price string like "159 ЯН"
             
             // Optional: update title and description from SDK if needed
@@ -461,6 +461,25 @@ function loadAdRewardData(data) {
  * Проверяет, является ли текущая платформа VK или OK
  * @returns {boolean} - true если VK или OK
  */
+/**
+ * Checks if current platform supports real IAP payments via SDK payments catalog.
+ * If SDK is not ready / payments unavailable, returns false.
+ */
+function isPlatformSupportsIAP() {
+    return !!(
+        window.playgamaSDK &&
+        typeof window.playgamaSDK.isPlatformSupportsIAP === 'function' &&
+        window.playgamaSDK.isPlatformSupportsIAP()
+    );
+}
+
+/**
+ * Should UI fallback IAP-priced items to premium currency (marks).
+ * Used for platforms/testing environments without payments support.
+ */
+function shouldFallbackIAPToPremiumCurrency() {
+    return !isPlatformSupportsIAP();
+}
 function isVKOrOKPlatform() {
     if (!window.playgamaSDK || !window.playgamaSDK.platform) {
         return false;

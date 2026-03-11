@@ -121,7 +121,6 @@ class ShopUI {
      * @returns {Array} - Отфильтрованный массив
      */
     filterItemsForVKOK(items) {
-        // Проверяем наличие функции isVKOrOKPlatform
         const isVKOrOK = typeof isVKOrOKPlatform === 'function' ? isVKOrOKPlatform() : false;
         
         if (!isVKOrOK) {
@@ -203,7 +202,7 @@ class ShopUI {
         } else if (this.currentTab === 'hooks') {
             // Загружаем все крючки из базы
             if (typeof HOOKS_DATABASE !== 'undefined') {
-                const isVKOrOK = typeof isVKOrOKPlatform === 'function' ? isVKOrOKPlatform() : false;
+                const shouldFallbackIAP = typeof shouldFallbackIAPToPremiumCurrency === 'function' ? shouldFallbackIAPToPremiumCurrency() : false;
                 
                 this.items = HOOKS_DATABASE.map(hook => {
                     const requiredLevel = typeof getRequiredLevelForTier === 'function' ? getRequiredLevelForTier(hook.tier) : 1;
@@ -219,7 +218,7 @@ class ShopUI {
                     };
                     
                     // Для VK/OK конвертируем IAP снасти в марки
-                    if (isVKOrOK && hook.currency === 'iap' && hook.price) {
+                    if (shouldFallbackIAP && hook.currency === 'iap' && hook.price) {
                         const marksPrice = typeof convertIAPPriceToMarks === 'function' ? 
                                           convertIAPPriceToMarks(hook.price) : hook.price * 7;
                         mappedHook = {
@@ -237,7 +236,7 @@ class ShopUI {
         } else if (this.currentTab === 'floats') {
             // Загружаем все поплавки из базы
             if (typeof FLOATS_DATABASE !== 'undefined') {
-                const isVKOrOK = typeof isVKOrOKPlatform === 'function' ? isVKOrOKPlatform() : false;
+                const shouldFallbackIAP = typeof shouldFallbackIAPToPremiumCurrency === 'function' ? shouldFallbackIAPToPremiumCurrency() : false;
                 
                 this.items = FLOATS_DATABASE.map(float => {
                     const requiredLevel = typeof getRequiredLevelForTier === 'function' ? getRequiredLevelForTier(float.tier) : 1;
@@ -253,7 +252,7 @@ class ShopUI {
                     };
                     
                     // Для VK/OK конвертируем IAP снасти в марки
-                    if (isVKOrOK && float.currency === 'iap' && float.price) {
+                    if (shouldFallbackIAP && float.currency === 'iap' && float.price) {
                         const marksPrice = typeof convertIAPPriceToMarks === 'function' ? 
                                           convertIAPPriceToMarks(float.price) : float.price * 7;
                         mappedFloat = {
@@ -271,7 +270,7 @@ class ShopUI {
         } else if (this.currentTab === 'lines') {
             // Загружаем все лески из базы
             if (typeof LINES_DATABASE !== 'undefined') {
-                const isVKOrOK = typeof isVKOrOKPlatform === 'function' ? isVKOrOKPlatform() : false;
+                const shouldFallbackIAP = typeof shouldFallbackIAPToPremiumCurrency === 'function' ? shouldFallbackIAPToPremiumCurrency() : false;
                 
                 this.items = LINES_DATABASE.map(line => {
                     const requiredLevel = typeof getRequiredLevelForTier === 'function' ? getRequiredLevelForTier(line.tier) : 1;
@@ -287,7 +286,7 @@ class ShopUI {
                     };
                     
                     // Для VK/OK конвертируем IAP снасти в марки
-                    if (isVKOrOK && line.currency === 'iap' && line.price) {
+                    if (shouldFallbackIAP && line.currency === 'iap' && line.price) {
                         const marksPrice = typeof convertIAPPriceToMarks === 'function' ? 
                                           convertIAPPriceToMarks(line.price) : line.price * 7;
                         mappedLine = {
@@ -305,7 +304,7 @@ class ShopUI {
         } else if (this.currentTab === 'reels') {
             // Загружаем все катушки из базы
             if (typeof REELS_DATABASE !== 'undefined') {
-                const isVKOrOK = typeof isVKOrOKPlatform === 'function' ? isVKOrOKPlatform() : false;
+                const shouldFallbackIAP = typeof shouldFallbackIAPToPremiumCurrency === 'function' ? shouldFallbackIAPToPremiumCurrency() : false;
                 
                 this.items = REELS_DATABASE.map(reel => {
                     const requiredLevel = typeof getRequiredLevelForTier === 'function' ? getRequiredLevelForTier(reel.tier) : 1;
@@ -321,7 +320,7 @@ class ShopUI {
                     };
                     
                     // Для VK/OK конвертируем IAP снасти в марки
-                    if (isVKOrOK && reel.currency === 'iap' && reel.price) {
+                    if (shouldFallbackIAP && reel.currency === 'iap' && reel.price) {
                         const marksPrice = typeof convertIAPPriceToMarks === 'function' ? 
                                           convertIAPPriceToMarks(reel.price) : reel.price * 7;
                         mappedReel = {
@@ -339,7 +338,7 @@ class ShopUI {
         } else if (this.currentTab === 'rods') {
             // Загружаем все удочки из базы
             if (typeof RODS_DATABASE !== 'undefined') {
-                const isVKOrOK = typeof isVKOrOKPlatform === 'function' ? isVKOrOKPlatform() : false;
+                const shouldFallbackIAP = typeof shouldFallbackIAPToPremiumCurrency === 'function' ? shouldFallbackIAPToPremiumCurrency() : false;
                 
                 this.items = RODS_DATABASE.map(rod => {
                     const requiredLevel = typeof getRequiredLevelForTier === 'function' ? getRequiredLevelForTier(rod.tier) : 1;
@@ -355,7 +354,7 @@ class ShopUI {
                     };
                     
                     // Для VK/OK конвертируем IAP снасти в марки
-                    if (isVKOrOK && rod.currency === 'iap' && rod.price) {
+                    if (shouldFallbackIAP && rod.currency === 'iap' && rod.price) {
                         const marksPrice = typeof convertIAPPriceToMarks === 'function' ? 
                                           convertIAPPriceToMarks(rod.price) : rod.price * 7;
                         mappedRod = {
@@ -1062,8 +1061,8 @@ class ShopUI {
                     const iconSize = 17;
                     assetManager.drawGemIcon(ctx, x + 80 + priceWidth + 5 + iconSize/2, y + 38, iconSize);
                 } else {
-                    // Товар за ЯНы (IAP) - используем форматированную цену из SDK
-                    const priceText = item.priceFormatted || `${item.price} ${item.priceCurrencyCode || 'YAN'}`;
+                    // Товар за реальные деньги (IAP) - используем форматированную цену из SDK
+                    const priceText = item.priceFormatted || `${item.price}`;
                     ctx.fillStyle = '#e67e22';
                     ctx.font = this.getFont(17);
                     ctx.fillText(priceText, x + 80, y + 38);
@@ -1090,8 +1089,8 @@ class ShopUI {
                 const iconSize = 17;
                 assetManager.drawGemIcon(ctx, x + 80 + priceWidth + 5 + iconSize/2, y + 38, iconSize);
             } else if (item.currency === 'iap' || item.hideGemIcon) {
-                // Товар за ЯНы (IAP) - используем форматированную цену из SDK
-                const priceText = item.priceFormatted || `${item.price} ${item.priceCurrencyCode || 'YAN'}`;
+                // Товар за реальные деньги (IAP) - используем форматированную цену из SDK
+                const priceText = item.priceFormatted || `${item.price}`;
                 ctx.fillStyle = '#e67e22';
                 ctx.font = this.getFont(17);
                 ctx.textAlign = 'left';
@@ -1136,8 +1135,8 @@ class ShopUI {
                 const iconSize = 17;
                 assetManager.drawGemIcon(ctx, x + 80 + priceWidth + 5 + iconSize/2, y + 38, iconSize);
             } else if (item.currency === 'iap') {
-                // Товар за ЯНы (IAP) - используем форматированную цену из SDK
-                const priceText = item.priceFormatted || `${item.price} ${item.priceCurrencyCode || 'YAN'}`;
+                // Товар за реальные деньги (IAP) - используем форматированную цену из SDK
+                const priceText = item.priceFormatted || `${item.price}`;
                 ctx.fillStyle = '#e67e22';
                 ctx.font = this.getFont(17);
                 ctx.textAlign = 'left';
@@ -1706,10 +1705,18 @@ class ShopUI {
                     statsY += lineHeight;
                     ctx.fillStyle = '#bdc3c7';
                     
-                    // Старая цена
+                    // Старая цена - извлекаем валюту из текущей цены товара
                     ctx.fillStyle = '#95a5a6';
                     ctx.font = this.getFont(16, 'normal');
-                    ctx.fillText(`${L('shop_regular_price', 'Обычная цена:')} ${item.originalPrice} ЯН`, statsX, statsY);
+                    // Извлекаем валюту из priceFormatted (например, "159 ЯН" -> "ЯН")
+                    let currencySymbol = '';
+                    if (item.priceFormatted) {
+                        const parts = item.priceFormatted.split(' ');
+                        if (parts.length > 1) {
+                            currencySymbol = ' ' + parts.slice(1).join(' '); // Берем все после первого пробела
+                        }
+                    }
+                    ctx.fillText(`${L('shop_regular_price', 'Обычная цена:')} ${item.originalPrice}${currencySymbol}`, statsX, statsY);
                     statsY += lineHeight;
                     ctx.fillStyle = '#bdc3c7';
                     ctx.font = this.getFont(18, 'normal');
@@ -1859,14 +1866,14 @@ class ShopUI {
                 // Прогресс
                 ctx.fillStyle = '#3498db';
                 ctx.font = this.getFont(20);
-                ctx.fillText(`Прогресс: ${item.currentProgress}/${item.maxProgress}`, statsX, statsY);
+                ctx.fillText(`${L('ui_progress', 'Progress')}: ${item.currentProgress}/${item.maxProgress}`, statsX, statsY);
                 statsY += lineHeight;
                 ctx.fillStyle = '#bdc3c7';
                 ctx.font = this.getFont(18, 'normal');
                 
                 // Награда
                 ctx.fillStyle = '#2ecc71';
-                ctx.fillText(`Награда:`, statsX, statsY);
+                ctx.fillText(`${L('ui_quest_reward', 'Reward')}:`, statsX, statsY);
                 statsY += lineHeight;
                 ctx.fillStyle = '#bdc3c7';
                 
@@ -2104,8 +2111,8 @@ class ShopUI {
                     const iconSize = 20;
                     assetManager.drawGemIcon(ctx, statsX + priceWidth + 5 + iconSize/2, statsY, iconSize);
                 } else {
-                    // Товар за ЯНы (IAP) - используем форматированную цену из SDK
-                    const priceText = item.priceFormatted || `${item.price} ${item.priceCurrencyCode || 'YAN'}`;
+                    // Товар за реальные деньги (IAP) - используем форматированную цену из SDK
+                    const priceText = item.priceFormatted || `${item.price}`;
                     ctx.fillStyle = '#e67e22';
                     ctx.font = this.getFont(20);
                     ctx.fillText(`${L('shop_price', 'Цена:')} ${priceText}`, statsX, statsY);
@@ -2134,8 +2141,8 @@ class ShopUI {
                 const iconSize = 20;
                 assetManager.drawGemIcon(ctx, statsX + priceWidth + 5 + iconSize/2, statsY, iconSize);
             } else if (item.currency === 'iap' || item.hideGemIcon) {
-                // Товар за ЯНы (IAP) - используем форматированную цену из SDK
-                const priceText = item.priceFormatted || `${item.price} ${item.priceCurrencyCode || 'YAN'}`;
+                // Товар за реальные деньги (IAP) - используем форматированную цену из SDK
+                const priceText = item.priceFormatted || `${item.price}`;
                 ctx.fillStyle = '#e67e22';
                 ctx.font = this.getFont(20);
                 ctx.textAlign = 'left';
@@ -2184,8 +2191,8 @@ class ShopUI {
                 const iconSize = 20;
                 assetManager.drawGemIcon(ctx, statsX + priceWidth + 5 + iconSize/2, statsY, iconSize);
             } else if (item.currency === 'iap') {
-                // Товар за ЯНы (IAP) - используем форматированную цену из SDK
-                const priceText = item.priceFormatted || `${item.price} ${item.priceCurrencyCode || 'YAN'}`;
+                // Товар за реальные деньги (IAP) - используем форматированную цену из SDK
+                const priceText = item.priceFormatted || `${item.price}`;
                 ctx.fillStyle = '#e67e22';
                 ctx.font = this.getFont(20);
                 ctx.textAlign = 'left';
@@ -2403,7 +2410,7 @@ class ShopUI {
                     // Платформа поддерживает IAP - показываем цену в реальных деньгах
                     canBuy = true; // IAP всегда доступны
                     // Используем форматированную цену из SDK если доступна
-                    const priceText = item.priceFormatted || `${item.price} ${item.priceCurrencyCode || 'YAN'}`;
+                    const priceText = item.priceFormatted || `${item.price}`;
                     buttonText = `${L('buy', 'Купить')} ${priceText}`;
                     buttonColor1 = '#e67e22';
                     buttonColor2 = '#d35400';
@@ -2426,7 +2433,7 @@ class ShopUI {
                     // Платформа поддерживает IAP - показываем цену в реальных деньгах
                     canBuy = true; // IAP всегда доступны
                     // Используем форматированную цену из SDK если доступна
-                    const priceText = item.priceFormatted || `${item.price} ${item.priceCurrencyCode || 'YAN'}`;
+                    const priceText = item.priceFormatted || `${item.price}`;
                     buttonText = `${L('buy', 'Купить')} ${priceText}`;
                     buttonColor1 = '#e67e22';
                     buttonColor2 = '#d35400';
@@ -2456,7 +2463,7 @@ class ShopUI {
                 if (supportsIAP) {
                     // Платформа поддерживает IAP - показываем цену в реальных деньгах
                     canBuy = true; // Всегда доступны
-                    const priceText = item.priceFormatted || `${item.price} ${item.priceCurrencyCode || 'YAN'}`;
+                    const priceText = item.priceFormatted || `${item.price}`;
                     buttonText = `${L('buy', 'Купить')} ${priceText}`;
                     buttonColor1 = '#e67e22';
                     buttonColor2 = '#d35400';
@@ -3048,6 +3055,15 @@ class ShopUI {
         this.fishListModal.scrollOffset = 0;
         this.fishListModal.visible = true;
         this.fishListModal.justOpened = true; // Флаг, что модальное окно только что открылось
+        
+        // Предзагружаем изображения рыб для отображения
+        if (this.fishListModal.fish && window.assetManager) {
+            this.fishListModal.fish.forEach(fish => {
+                window.assetManager.loadFishImage(fish.id).catch(err => {
+                    console.warn(`Failed to preload fish ${fish.id}:`, err);
+                });
+            });
+        }
         
         // Сбрасываем флаг через небольшой таймаут
         setTimeout(() => {
@@ -4198,3 +4214,4 @@ class ShopUI {
     // Callback при покупке
     onBuy = null;
 }
+

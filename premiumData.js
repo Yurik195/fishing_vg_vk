@@ -580,9 +580,9 @@ class PremiumEffectsManager {
  */
 function getPremiumItemWithPlatformPrice(item) {
     // Проверяем наличие функции isVKOrOKPlatform
-    const isVKOrOK = typeof isVKOrOKPlatform === 'function' ? isVKOrOKPlatform() : false;
+    const shouldFallbackIAP = typeof shouldFallbackIAPToPremiumCurrency === 'function' ? shouldFallbackIAPToPremiumCurrency() : false;
     
-    if (isVKOrOK && item.currency === 'iap') {
+    if (shouldFallbackIAP && item.currency === 'iap') {
         // Конвертируем IAP цену в марки
         const marksPrice = typeof convertIAPPriceToMarks === 'function' ? 
                           convertIAPPriceToMarks(item.price) : item.price * 7;
